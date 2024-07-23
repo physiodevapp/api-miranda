@@ -29,12 +29,12 @@ export class User implements UserInterface {
     this.email = user.email
   }
 
-  static fetchOne (userId: string) {
-    const userList = userDataList as UserInterface[]
+  static fetchOne (userId: string): User {
+    const userList = userDataList as User[]
     if (!userList)
       throw new APIError("There is no users data", 500, false);
 
-    const user = userList.find((user: UserInterface) => user.id = userId)
+    const user = userList.find((user: User) => user.id = userId)
     if (!user)
       throw new APIError("User not found", 400, true)
     
