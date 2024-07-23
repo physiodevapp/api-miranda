@@ -1,6 +1,6 @@
-import Express from 'express';
+import express from 'express';
 
-export const app = Express();
+export const app = express();
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
