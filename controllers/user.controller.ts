@@ -2,7 +2,7 @@
 
 import Express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
-import { User } from '../services/user';
+import { User } from '../services/user.service';
 
 
 const list = (searchText: string = "") => {
@@ -17,9 +17,15 @@ const list = (searchText: string = "") => {
   }
 }
 
-const create = (req: Request, res: Response, _next: NextFunction) => {
+const create = (req: Request, res: Response, next: NextFunction) => {
   
-  res.json(req.body)
+  try {
+    const newUser = User.create(req.body)
+
+    res.json(newUser);
+  } catch (error) {
+    next(error)
+  }
 
 }
 
@@ -27,7 +33,7 @@ const detail = (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = User.fetchOne(req.params.userId);
     
-    res.status(201).json(user);
+    res.status(200).json(user);
   } catch (error) {
     next(error);
   }

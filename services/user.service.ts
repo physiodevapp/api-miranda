@@ -1,4 +1,4 @@
-import { UserInterface, UserJobType, UserStatusType } from '../interfaces/User';
+import { UserInterface, UserJobType, UserStatusType } from '../interfaces/User.interface';
 import userDataList from '../data/users.json';
 import { APIError } from '../utils/APIError';
 
@@ -31,12 +31,14 @@ export class User implements UserInterface {
 
   static fetchOne (userId: string) {
     const userList = userDataList as UserInterface[]
-    const user = userList.find((user: UserInterface) => user.id = userId)
+    if (!userList)
+      throw new APIError("There is no users data", 500, false);
 
-    if (user)
-      return user
-    else
+    const user = userList.find((user: UserInterface) => user.id = userId)
+    if (!user)
       throw new APIError("User not found", 400, true)
+    
+    return user
   }
 
   static fetchAll (searchTerm: string): User[] | void {
@@ -52,17 +54,17 @@ export class User implements UserInterface {
 
   static create(user: User): User | void {
     if (!user)
-      throw new APIError("Invalid user schema", 404, false)
+      throw new APIError("USer is not provided", 404, false)
     
     return user;
   }
 
   static delete(userId: string): void {
     if (!userId)
-      throw new APIError("User Id doesn't provided", 400, false);
+      throw new APIError("User id isn't provided", 400, false);
     
     const userList = userDataList as User[]
-    const user = userList.find((user: User) => user.id = userId)
+    const user = userList.find((user: User) => user.id === userId)
     if (!user)
       throw new APIError("User not found", 404, false)
 
@@ -80,7 +82,6 @@ export class User implements UserInterface {
       ...formData
     }
 
-    return updateUser
-    
+    return updateUser    
   }
 }
