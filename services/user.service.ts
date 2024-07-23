@@ -29,7 +29,7 @@ export class User implements UserInterface {
     this.email = user.email
   }
 
-  static fetchOne (userId: string): User {
+  static fetchOne (userId: string): User | void {
     const userList = userDataList as User[]
     if (!userList)
       throw new APIError("There is no users data", 500, false);
@@ -43,13 +43,13 @@ export class User implements UserInterface {
 
   static fetchAll (searchTerm: string): User[] | void {
     const userList = userDataList as User[]
+    
+    if (!userList)
+      throw new APIError("There is no users data", 500, false)
 
     const filteredUserList = userList.filter((user: User) => user.first_name.includes(searchTerm) || user.last_name.includes(searchTerm))
 
-    if (filteredUserList)
-      return filteredUserList
-    else if (!userList)
-      throw new APIError("There is no users data", 500, false)
+    return filteredUserList;
   }
 
   static create(user: User): User | void {

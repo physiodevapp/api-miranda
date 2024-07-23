@@ -5,6 +5,7 @@ import logger from 'morgan';
 import { router as userRoutes } from './controllers/user.controller';
 import { router as roomRoutes } from './controllers/room.controller';
 import { router as contactRoutes } from './controllers/contact.controller';
+import { router as bookingRoutes } from './controllers/booking.controller';
 import { Response, Request, NextFunction } from 'express';
 import { APIError } from './utils/APIError';
 
@@ -16,6 +17,7 @@ app.use(Express.urlencoded({ extended: true }));
 
 app.use('/users', userRoutes);
 app.use('/rooms', roomRoutes);
+app.use('/bookings', bookingRoutes);
 app.use('/contacts', contactRoutes);
 
 app.use((error: APIError, _req: Request, res: Response, _next: NextFunction) => {
