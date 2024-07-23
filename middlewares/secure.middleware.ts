@@ -8,15 +8,21 @@ interface DecodedToken {
   } | string;
 }
 
-export const addAuthHeader = (req: Request, _res: Response, next: NextFunction) => {
-  const payload = { email: "admin.miranda@example.com" };
-  const secretKey: string = process.env.SECRET_KEY || 'exAmpL3_seCreT_K3y';
-  const token = jwt.sign({ sub: payload }, secretKey, { expiresIn: '1h' });
+export const addAuthHeader = (addAuth = false) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (addAuth) {
+      const payload = { email: "admin.miranda@example.com" };
+      const secretKey: string = process.env.SECRET_KEY || 'exAmpL3_seCreT_K3y';
+      const token = jwt.sign({ sub: payload }, secretKey, { expiresIn: '1h' });
+    
+      req.headers['authorization'] = `Bearer ${token}`;
+    }
+  
+    next();
+  }
+}
+  
 
-  req.headers['authorization'] = `Bearer ${token}`;
-
-  next();
-};
 
 
 export const auth = (req: Request, _res: Response, next: NextFunction) => {

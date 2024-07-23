@@ -11,8 +11,6 @@ import { APIError } from './utils/APIError';
 import { addAuthHeader, auth } from "./middlewares/secure.middleware";
 import { app  } from "./server";
 
-// const app = express();
-
 dotEnvConfig();
 
 app.use(logger("dev"));
@@ -21,7 +19,7 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use(addAuthHeader);
+app.use(addAuthHeader(true));
 
 app.use('/users', auth, userRoutes);
 app.use('/rooms', auth, roomRoutes);
@@ -30,10 +28,5 @@ app.use('/contacts', auth, contactRoutes);
 
 app.use((error: APIError, _req: Request, res: Response, _next: NextFunction) => {
   res.status(error.status || 500).json({message: error.safe ? error.message : "Application error"})
-})
-
-// const port = process.env.PORT || 3000;
-// app.listen(port, () => {
-//   console.log(`The app is running at port ${port}`);
-// })
+});
 
