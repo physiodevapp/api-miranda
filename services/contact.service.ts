@@ -25,7 +25,7 @@ export class Contact implements ContactInterface {
     this.datetime = contact.datetime;
   }
 
-  static fetchOne (contactId: string): Contact {
+  static fetchOne (contactId: string): Contact | void {
     const contactList = contactDataList as Contact[]
     if (!contactList)
       throw new APIError("There is no contacts data", 500, false);

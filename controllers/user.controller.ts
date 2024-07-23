@@ -5,15 +5,14 @@ import { headers } from '../middlewares/response.middleware';
 import { User } from '../services/user.service';
 
 
-const list = (searchText: string = "") => {
-  return (_req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userList = User.fetchAll(searchText);
-  
-      res.json(userList);      
-    } catch (error) {
-      next(error);
-    }
+const list = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const searchTerm =  typeof req.query?.search_term === "string" ? req.query?.search_term : "";
+    const userList = User.fetchAll(searchTerm);
+
+    res.json(userList);      
+  } catch (error) {
+    next(error);
   }
 }
 
@@ -61,7 +60,7 @@ const updateUser = (req: Request, res: Response, next: NextFunction) => {
 
 export const router = Express.Router();
 
-router.get("/", headers, list());
+router.get("/", headers, list);
 router.post("/", headers, create);
 router.get("/:userId", headers, detail);
 router.delete("/:userId", headers, deleteUser);
