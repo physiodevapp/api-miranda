@@ -1,4 +1,4 @@
-import Express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
 import { Room } from '../services/room.service';
 
@@ -54,7 +54,7 @@ const updateRoom = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-export const router = Express.Router();
+export const router = express.Router();
 
 router.get("/", headers, list);
 router.post("/", headers, create);
