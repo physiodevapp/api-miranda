@@ -32,7 +32,7 @@ export class Booking implements BookingInterface {
     if (!bookingList)
       throw new APIError("There is no bookings data", 500, false);
 
-    const booking = bookingList.find((booking: Booking) => booking.id = bookingId)
+    const booking = bookingList.find((booking: Booking) => booking.id === bookingId)
     if (!booking)
       throw new APIError("Booking not found", 400, true)
     

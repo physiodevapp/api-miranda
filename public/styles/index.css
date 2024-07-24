@@ -1,0 +1,104 @@
+html,
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-width: 320px;
+}
+
+.section {
+  background-color: white;
+  height: 100%;
+}
+.section__article {
+  height: 90%;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 2em;
+  border-radius: 1em;
+  max-width: 600px;
+  background-color: white;
+  box-shadow: 1px 10px 23px -1px rgb(191, 191, 191);
+}
+.section__article__title {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+.section__article__authorization {
+  display: flex;
+  justify-content: space-around;
+  text-align: right;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.section__article__authorization input {
+  padding: 0.4em;
+  margin-right: 0.6em;
+  border: 1px solid #ababab;
+  border-radius: 0.4em;
+}
+.section__article__authorization input[name=email] {
+  flex: 1;
+}
+.section__article__authorization input[name=password] {
+  width: 14%;
+}
+.section__article__authorization button {
+  font-weight: bold;
+  border: none;
+  padding: 1em 0.8em;
+  border-radius: 0.4em;
+  cursor: pointer;
+  width: 40%;
+  color: #135846;
+  background-color: #EBF1EF;
+  border: 1px solid #FFEDEC;
+}
+.section__article__authorization button:hover {
+  color: white;
+  background-color: #135846;
+}
+.section__article__authorization button.authorized {
+  color: #E23428;
+  background-color: #FFEDEC;
+}
+.section__article__authorization button.authorized:hover {
+  color: white;
+  background-color: #E23428;
+}
+.section__article__endpoints {
+  list-style-type: none;
+  font-size: 1.2rem;
+  color: #ababab;
+}
+.section__article__endpoints.authorized {
+  color: #135846;
+}
+.section__article__endpoints.authorized a:hover {
+  color: white;
+  background-color: #135846;
+}
+.section__article__endpoints li {
+  padding: 0.4em;
+}
+.section__article__endpoints li a {
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0.2em;
+  border-radius: 0.2em;
+}
+.section__article__endpoints li a:hover {
+  color: white !important;
+  background-color: #ababab;
+}
+.section__article__endpoints li a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+/*# sourceMappingURL=index.css.map */

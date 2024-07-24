@@ -1,0 +1,35 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/index.css"/>
+    <title>Miranda API</title>
+  </head>
+  <body>
+    <section class="section">
+      <article class="section__article">
+        <h1 class="section__article__title">Miranda API</h1>      
+        <form method="POST" action="/login" class="section__article__authorization">
+          <input name="email" value="" placeholder="Try: admin.miranda@example.com"/>
+          <input name="password" value="" placeholder="Try: 0000"/>
+          <button type="submit" class="{{#user}}authorized{{/user}}{{^user}}{{/user}}">
+          {{#user}}
+            <span>Unauthorize private routes</span>
+          {{/user}}
+          {{^user}}
+            <span>Authorize private routes</span>
+          {{/user}}
+          </button>
+        </form>  
+        <ul class="section__article__endpoints {{#user}}authorized{{/user}}{{^user}}{{/user}}">
+          <li> <i class="fa fa-users fa-fw"></i> <a href="/users">Users</a> - <a href="/users/c7a66993-8682-47e8-8bb7-5dac735033cd"">User Zorine</a> </li> 
+          <li> <i class="fa fa-address-book-o fa-fw"></i> <a href="/bookings">Bookings</a> - <a href="/bookings/414c9062-b5f4-4156-b1f3-786a007d881e"">Jill's booking</a></li>
+          <li> <i class="fa fa-key fa-fw"></i> <a href="/rooms">Rooms</a> - <a href="/rooms/b8eed84f-771e-4702-844d-58c1862914f0">Room #1</a></li>
+          <li> <i class="fa fa-phone-square fa-fw"></i> <a href="/contacts">Contacts</a> - <a href="/contacts/05d26fb9-89eb-4299-b201-4472b273f69a">Contact of Cristina</a></li>
+        </ul>
+      </article>
+    </section>    
+  </body>
+</html>

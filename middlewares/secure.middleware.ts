@@ -1,51 +1,33 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import { APIError } from "../utils/APIError";
+import { verifyToken } from "../utils/token";
 
-interface DecodedToken {
-  sub: {
-    email: string;
-  } | string;
-}
+export const checkRequestAuth = ((req: Request, _res: Response, next: NextFunction) => {
+  const cookieToken: string = req.cookies.token;
+  const headerToken = req.headers.authorization?.split(" ")[1];
+  const token = headerToken ?? cookieToken;
 
-export const addAuthHeader = (addAuth = false) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    if (addAuth) {
-      const payload = { email: "admin.miranda@example.com" };
-      const secretKey: string = process.env.SECRET_KEY || 'exAmpL3_seCreT_K3y';
-      const token = jwt.sign({ sub: payload }, secretKey, { expiresIn: '1h' });
-    
+  if (token) {
+    const decoded = verifyToken(token);
+
+    if (typeof decoded.sub === 'object' && decoded.sub !== null && 'email' in decoded.sub && decoded.sub.email === "admin.miranda@example.com" && decoded.sub.password === "0000") {
       req.headers['authorization'] = `Bearer ${token}`;
-    }
-  
-    next();
-  }
-}
-  
 
-
-
-export const auth = (req: Request, _res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(" ")?.[1]
-  if (!token) {
-    const error = new APIError("Missing token", 401, true)
-    next(error)
-
-    return
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY || 'exAmpL3_seCreT_K3y') as DecodedToken
-    if (typeof decoded.sub === 'object' && decoded.sub !== null && 'email' in decoded.sub) {
       req.user = decoded.sub;
-
-      next();
-    } else {
-      const error = new APIError("Invalid token payload", 400, true);
-
-      next(error);
     }
-  } catch (error) {
-    next(error)
+  }
+
+  next();
+});
+
+
+export const isAuth = (req: Request, _res: Response, next: NextFunction) => {
+
+  if (req.user) {
+    next()
+  } else {
+    const error = new APIError("Protected route", 401, true);
+
+    next(error);
   }
 }

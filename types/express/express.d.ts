@@ -1,5 +1,5 @@
 import express from 'express';
-import {Express} from "express-serve-static-core";
+import { Express } from "express-serve-static-core";
 
 declare global {
   namespace Express {
@@ -8,6 +8,10 @@ declare global {
     }
 
     interface Request {
+      cookies: {
+        token?: string; 
+        [key: string]: any;
+      };
       user?: User;
     }
   }

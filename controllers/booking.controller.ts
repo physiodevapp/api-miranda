@@ -15,9 +15,9 @@ const list = (req: Request, res: Response, next: NextFunction) => {
 
 const detail = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = Booking.fetchOne(req.params.userId);
+    const booking = Booking.fetchOne(req.params.bookingId);
     
-    res.status(200).json(user);
+    res.status(200).json(booking);
   } catch (error) {
     next(error);
   }
@@ -26,4 +26,4 @@ const detail = (req: Request, res: Response, next: NextFunction) => {
 export const router = express.Router();
 
 router.get("/", headers, list);
-router.get("/:userId", headers, detail);
+router.get("/:bookingId", headers, detail);

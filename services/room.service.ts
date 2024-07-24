@@ -31,19 +31,19 @@ export class Room implements RoomInterface {
     this.photos = room.photos
   }
 
-  static fetchOne (roomId: string): Room | void {
+  static fetchOne(roomId: string): Room | void {
     const roomList = roomDataList as Room[];
     if (!roomList)
       throw new APIError("There is no rooms data", 500, false)
 
-    const room = roomList.find((room: Room) => room.id = roomId)
+    const room = roomList.find((room: Room) => room.id === roomId)
     if (!room)
       throw new APIError("Room not found", 400, true);
     
     return room;
   }
 
-  static fetchAll (): Room[] | void {
+  static fetchAll(): Room[] | void {
     const roomList = roomDataList as Room[]
 
     if (!roomList)
