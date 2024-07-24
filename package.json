@@ -31,13 +31,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-<<<<<<< Updated upstream
-    "morgan": "^1.10.0"
-=======
     "morgan": "^1.10.0",
     "mustache": "^4.2.0",
     "sass": "^1.77.8",
     "serverless-http": "^3.2.0"
->>>>>>> Stashed changes
   }
 }
