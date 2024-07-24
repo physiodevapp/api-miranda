@@ -26,9 +26,9 @@ const create = (req: Request, res: Response, next: NextFunction) => {
 
 const detail = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = Room.fetchOne(req.params.userId);
+    const room = Room.fetchOne(req.params.roomId);
     
-    res.status(200).json(user);
+    res.status(200).json(room);
   } catch (error) {
     next(error);
   }

@@ -1,6 +1,6 @@
 {
   "watch": ["."],
-  "ext": "ts,json",
+  "ext": "ts,json,css,mustache",
   "ignore": [],
-  "exec": "ts-node ./app.ts"
+  "exec": "ts-node ./server.ts"
 }
