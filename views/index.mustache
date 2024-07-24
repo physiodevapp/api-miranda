@@ -12,8 +12,8 @@
       <article class="section__article">
         <h1 class="section__article__title">Miranda API</h1>      
         <form method="POST" action="/login" class="section__article__authorization">
-          <input name="email" value="" placeholder="Try: admin.miranda@example.com"/>
-          <input name="password" value="" placeholder="Try: 0000"/>
+          <input name="email" value="{{#user}}{{user.email}}{{/user}}" {{#user}}disabled{{/user}} placeholder="Try: admin.miranda@example.com"/>
+          <input name="password" type="password" value="{{#user}}{{user.password}}{{/user}}" {{#user}}disabled{{/user}} placeholder="Try: 0000"/>
           <button type="submit" class="{{#user}}authorized{{/user}}{{^user}}{{/user}}">
           {{#user}}
             <span>Unauthorize private routes</span>
