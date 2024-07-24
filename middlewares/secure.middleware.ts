@@ -8,12 +8,16 @@ export const checkRequestAuth = ((req: Request, _res: Response, next: NextFuncti
   const token = headerToken ?? cookieToken;
 
   if (token) {
-
     const decoded = verifyToken(token);
+
     if (typeof decoded.sub === 'object' && decoded.sub !== null && 'email' in decoded.sub && decoded.sub.email === "admin.miranda@example.com" && decoded.sub.password === "0000") {
       req.headers['authorization'] = `Bearer ${token}`;
 
       req.user = decoded.sub;
+    } else {
+      const error = new APIError("Invalid credentials", 401, true)
+
+      next(error)
     }
 
   }

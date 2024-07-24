@@ -62,11 +62,9 @@ app.post('/login', (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }   
 });
-
 app.get('/', (req: Request, res: Response) => {
   res.render('index', {user: req.user});
 });
-
 app.use('/users', isAuth, userRoutes);
 app.use('/rooms', isAuth, roomRoutes);
 app.use('/bookings', isAuth, bookingRoutes);
