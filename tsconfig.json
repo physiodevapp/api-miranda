@@ -100,5 +100,5 @@
   },
   "include": ["**/*.ts"], // Include all .ts files in the project root and subdirectories
   "exclude": ["node_modules"],
-  "files": ["types/express/express.d.ts"]
+  "files": ["src/types/express/express.d.ts"]
 }
