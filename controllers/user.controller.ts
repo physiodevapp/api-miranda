@@ -42,7 +42,7 @@ const deleteUser = (req: Request, res: Response, next: NextFunction) => {
   try {
     User.delete(req.params.userId)
 
-    res.status(200);
+    res.status(200).json();
   } catch (error) {
     next(error)
   }
@@ -52,7 +52,7 @@ const updateUser = (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedUser = User.update(req.params.userId, req.body)
     
-    res.json(updatedUser)
+    res.status(200).json(updatedUser)
   } catch (error) {
     next(error)
   }

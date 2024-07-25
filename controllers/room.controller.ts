@@ -38,7 +38,7 @@ const deleteRoom = (req: Request, res: Response, next: NextFunction) => {
   try {
     Room.delete(req.params.roomId)
 
-    res.status(200);
+    res.status(200).json();
   } catch (error) {
     next(error)
   }
@@ -48,7 +48,7 @@ const updateRoom = (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedRoom = Room.update(req.params.roomId, req.body)
     
-    res.json(updatedRoom)
+    res.status(200).json(updatedRoom);
   } catch (error) {
     next(error)
   }

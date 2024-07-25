@@ -44,7 +44,7 @@ app.post('/login', (req: Request, res: Response, next: NextFunction) => {
   if (req.user) {
     res.clearCookie('token')
 
-    res.redirect('/');
+    res.redirect(302, "/");
   }
 
   const { email, password } = req.body;
@@ -55,7 +55,7 @@ app.post('/login', (req: Request, res: Response, next: NextFunction) => {
   
     res.cookie('token', token, { httpOnly: true });
 
-    res.redirect("/");
+    res.redirect(302, "/");
   } else {
     const error = new APIError("Invalid credentials", 401, true);
 
