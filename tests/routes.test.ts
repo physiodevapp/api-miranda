@@ -63,4 +63,14 @@ describe("Testing User routes", () => {
     expect(response.body).toEqual(userDataList);
   });
 
+  test("Users route returns a single user if valid credentials", async () => {
+    const userId = "c1c692d5-a8bb-4987-bda9-bf0d63cf852f";
+
+    const response = await request(app)
+      .get(`/users/${userId}`)
+      .set("authorization", `Bearer ${token}`); 
+    
+    expect(response.body).toEqual(userDataList.find((user) => user.id === userId));
+  });
+
 });
