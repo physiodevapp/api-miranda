@@ -7,6 +7,7 @@ html,
 
 body {
   min-width: 320px;
+  font-family: "Poppins";
 }
 
 .section {
@@ -21,13 +22,29 @@ body {
   transform: translate(-50%, -50%);
   padding: 2em;
   border-radius: 1em;
-  max-width: 600px;
+  max-width: 650px;
   background-color: white;
   box-shadow: 1px 10px 23px -1px rgb(191, 191, 191);
 }
 .section__article__title {
   margin-bottom: 1rem;
   font-size: 2rem;
+}
+.section__article__title img {
+  width: 20%;
+  position: absolute;
+  right: 6%;
+  top: 3%;
+}
+.section__article__subtitle {
+  font-size: 1.4rem;
+  margin-bottom: 0.6em;
+}
+.section__article__subtitle i {
+  color: #2cd518;
+  margin-left: 0.4em;
+  line-height: 0;
+  vertical-align: middle;
 }
 .section__article__authorization {
   display: flex;
@@ -41,6 +58,7 @@ body {
   margin-right: 0.6em;
   border: 1px solid #ababab;
   border-radius: 0.4em;
+  font-family: "Poppins";
 }
 .section__article__authorization input[name=email] {
   flex: 1;
@@ -58,6 +76,7 @@ body {
   color: #135846;
   background-color: #EBF1EF;
   border: 1px solid #FFEDEC;
+  font-family: "Poppins";
 }
 .section__article__authorization button:hover {
   color: white;
@@ -85,6 +104,7 @@ body {
 }
 .section__article__endpoints li {
   padding: 0.4em;
+  cursor: default;
 }
 .section__article__endpoints li a {
   text-decoration: none;
@@ -99,6 +119,35 @@ body {
 .section__article__endpoints li a:visited {
   color: inherit;
   text-decoration: none;
+}
+.section__article__footer {
+  color: white;
+  background-color: #222222;
+  position: absolute;
+  bottom: 0%;
+  left: 0%;
+  width: 100%;
+  padding: 1.1em;
+  border-radius: 0em 0em 1em 1em;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  font-weight: normal;
+}
+.section__article__footer__copyright {
+  font-weight: inherit;
+}
+.section__article__footer__author {
+  font-weight: inherit;
+  transition: transform 0.2s ease-in-out;
+  transform-origin: right;
+}
+.section__article__footer__author:hover {
+  transform: scale(1.1);
+}
+.section__article__footer__author a {
+  color: inherit;
+  text-decoration: underline !important;
 }
 
 /*# sourceMappingURL=index.css.map */
