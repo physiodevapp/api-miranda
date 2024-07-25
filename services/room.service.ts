@@ -61,7 +61,6 @@ export class Room implements RoomInterface {
   }
 
   static delete(roomId: string): void {
-    console.log(roomId)
     if (!roomId)
       throw new APIError("Id of the room isn't provided", 400, false);
     

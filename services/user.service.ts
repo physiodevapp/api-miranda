@@ -59,7 +59,7 @@ export class User implements UserInterface {
     return user;
   }
 
-  static delete(userId: string): void {
+  static delete(userId: string) {
     if (!userId)
       throw new APIError("User id isn't provided", 400, false);
     
