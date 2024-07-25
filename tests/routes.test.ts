@@ -8,27 +8,33 @@ import contactsDataList from '../data/contacts.json';
 import roomsDataList from '../data/rooms.json';
 
 describe("Testing public routes", () => {
-  test("Root route returns status code 200", async () => {
+  test('Route "/" returns status code 200', async () => {
     const response = await request(app).get("/");
  
     expect(response.status).toEqual(200);
   });
 })
 
-describe("Testing login process", () => {
+describe("Testing log process", () => {
 
-  test("Login with valid credentials", async() => {
+  test("Log in with valid credentials", async() => {
     const response = await request(app)
       .post("/login")
       .send({
         email: "admin.miranda@example.com",
         password: "0000"
       })
-    
+
+
+    const cookies = response.headers['set-cookie'];
+    const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
+
+    expect(cookies).toBeDefined();    
+    expect(cookieArray.some((cookie: string) => cookie.startsWith('token='))).toBe(true);
     expect(response.status).toEqual(302);
   });
 
-  test("Login with invalid credentials", async() => {
+  test("Log in with invalid credentials", async() => {
     const response = await request(app)
       .post("/login")
       .send({
@@ -37,6 +43,26 @@ describe("Testing login process", () => {
       })
     
     expect(response.status).toEqual(401);
+  });
+
+  test("Log out with valid credentials remove the credentials-related token", async() => {
+    const payload = {
+      email: "admin.miranda@example.com",
+      password: "0000"
+    }
+    const token = generateToken(payload);
+
+    const response = await request(app)
+      .post("/logout")
+      .set("authorization", `Bearer ${token}`); 
+
+    const cookies = response.headers['set-cookie'];
+    const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
+    const clearedTokenCookie = cookieArray.find((cookie: string) => cookie.startsWith('token='));
+
+    expect(cookies).toBeDefined();
+    expect(clearedTokenCookie).toContain('token=;');
+    expect(response.status).toEqual(302)
   });
 
 });

@@ -41,12 +41,6 @@ app.use(checkRequestAuth);
 
 app.post('/login', (req: Request, res: Response, next: NextFunction) => {
 
-  if (req.user) {
-    res.clearCookie('token')
-
-    res.redirect(302, "/");
-  }
-
   const { email, password } = req.body;
 
   if (email === "admin.miranda@example.com" && password === "0000") {
@@ -61,6 +55,17 @@ app.post('/login', (req: Request, res: Response, next: NextFunction) => {
 
     next(error);
   }   
+});
+app.post('/logout', (req: Request, res: Response, next: NextFunction) => {
+  if (req.user) {
+    res.clearCookie('token');
+    
+    res.redirect(302, "/");
+  } else {
+    const error = new APIError("User is not authenticated", 401, true);
+
+    next(error)
+  }
 });
 app.get('/', (req: Request, res: Response) => {
   res.render('index', {user: req.user});
