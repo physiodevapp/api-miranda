@@ -8,7 +8,7 @@ interface DecodedToken {
 }
 
 export const generateToken = (payload: { email: string, password: string }) => {
-  const secretKey: string = process.env.SECRET_KEY || 'exAmpL3_seCreT_K3y';
+  const secretKey: string = process.env.SECRET_KEY as string;
 
   const token = jwt.sign({ sub: payload }, secretKey, { expiresIn: '1h' });
 
@@ -16,7 +16,8 @@ export const generateToken = (payload: { email: string, password: string }) => {
 };
 
 export const verifyToken = (token: string) => {
-  const decoded = jwt.verify(token, process.env.SECRET_KEY || 'exAmpL3_seCreT_K3y') as DecodedToken;
+  const secretKey: string = process.env.SECRET_KEY as string;
+  const decoded = jwt.verify(token, secretKey) as DecodedToken;
 
   return decoded;
 }
