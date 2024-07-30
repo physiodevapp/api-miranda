@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { RoomType } from "./Room.interface";
 
 export enum BookingStatusType {
@@ -5,7 +6,6 @@ export enum BookingStatusType {
   Check_out = "check_out",
   In_progress = "in_progress"
 }
-
 
 export interface BookingInterface {
   id: string,
@@ -15,7 +15,7 @@ export interface BookingInterface {
   check_in: string,
   check_out: string,
   room_type: RoomType,
-  room_number: number,
+  room: Types.ObjectId,
   status: BookingStatusType,
   special_request: string,
   createdAt?: Date,

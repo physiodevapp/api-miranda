@@ -1,11 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
-import { Booking } from './../services/booking.service';
+import { getBookingById, getBookingList } from '../services/booking.service';
  
-const list = (req: Request, res: Response, next: NextFunction) => {
+const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const searchTerm =  typeof req.query?.search_term === "string" ? req.query?.search_term : "";
-    const bookingList = Booking.fetchAll(searchTerm);
+    const bookingList = await getBookingList(searchTerm);
 
     res.json(bookingList);      
   } catch (error) {
@@ -13,9 +13,9 @@ const list = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-const detail = (req: Request, res: Response, next: NextFunction) => {
+const detail = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const booking = Booking.fetchOne(req.params.bookingId);
+    const booking = await getBookingById(req.params.bookingId);
     
     res.status(200).json(booking);
   } catch (error) {

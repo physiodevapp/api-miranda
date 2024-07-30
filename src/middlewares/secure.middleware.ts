@@ -3,7 +3,7 @@ import { APIError } from "../utils/APIError";
 import { verifyToken } from "../utils/token";
 import { User } from "../models/user.model";
 
-export const checkRequestAuth = (async (req: Request, _res: Response, next: NextFunction) => {
+export const checkRequestAuth = (async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.cookies.token;
 
@@ -18,6 +18,8 @@ export const checkRequestAuth = (async (req: Request, _res: Response, next: Next
       return next(new APIError("Invalid schema of the token", 401, false));
     }
   } catch (error) {
+    res.clearCookie('token');
+
     return next(new APIError("Invalid token", 401, true));
   }
 

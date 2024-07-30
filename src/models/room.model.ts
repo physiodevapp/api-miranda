@@ -8,7 +8,7 @@ import {
 
 const roomSchema = new Schema<RoomInterface>(
   {
-    number: { type: Number, required: true },
+    number: { type: Number, required: [true, "Room number is required"], unique: true },
     description: { type: String },
     facilities: { type: [String], enum: Object.values(RoomFacility) },
     name: { type: String, required: true },

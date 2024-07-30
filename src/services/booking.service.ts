@@ -1,53 +1,55 @@
-import { BookingInterface, BookingStatusType } from '../interfaces/Booking.interface';
-import bookingDataList from '../data/bookings.json';
-import { APIError } from '../utils/APIError';
-import { RoomType } from '../interfaces/Room.interface';
+import { BookingInterface } from "../interfaces/Booking.interface";
+import { APIError } from "../utils/APIError";
+import { Booking } from "../models/booking.model";
 
-export class Booking implements BookingInterface {
-  id: string;
-  first_name: string;
-  last_name: string;
-  order_date: string;
-  check_in: string;
-  check_out: string;
-  room_type: RoomType;
-  room_number: number;
-  status: BookingStatusType;
-  special_request: string;
+export const getBookingById = async (
+  bookingId: string
+): Promise<BookingInterface | void> => {
+  try {
+    const booking = await Booking.findById(bookingId).populate('room');
+    if (!booking) throw new APIError("Booking not found", 400, true);
 
-  constructor(booking: BookingInterface) {
-    this.id = booking.id;
-    this.first_name = booking.first_name;
-    this.last_name = booking.last_name;
-    this.order_date = booking.order_date;
-    this.check_in = booking.check_in;
-    this.check_out = booking.check_out;
-    this.room_type = booking.room_type;
-    this.room_number = booking.room_number;
-    this.status = booking.status;
-    this.special_request = booking.special_request;
-  }
-
-  static fetchOne (bookingId: string): Booking | void {
-    const bookingList = bookingDataList as Booking[]
-    if (!bookingList)
-      throw new APIError("There is no bookings data", 500, false);
-
-    const booking = bookingList.find((booking: Booking) => booking.id === bookingId)
-    if (!booking)
-      throw new APIError("Booking not found", 400, true)
-    
     return booking;
+  } catch (error) {
+    let errorMessage;
+
+    if (error instanceof Error) errorMessage = error.message;
+    else errorMessage = error;
+
+    throw new APIError(
+      `An error occurred when trying to get the booking: ${errorMessage}`,
+      500,
+      true
+    );
   }
+};
 
-  static fetchAll (searchTerm: string): Booking[] | void {
-    const bookingList = bookingDataList as Booking[]
-    
-    if (!bookingList)
-      throw new APIError("There is no users data", 500, false);
+export const getBookingList = async (
+  searchTerm: string
+): Promise<BookingInterface[] | void> => {
+  try {
+    const searchRegex = new RegExp(searchTerm, "i");
+    const bookingList = await Booking.find({
+      $or: [
+        { first_name: { $regex: searchRegex } },
+        { last_name: { $regex: searchRegex } },
+      ],
+    }).populate('room');
 
-    const filteredBookingList = bookingList.filter((booking: Booking) => booking.first_name.includes(searchTerm) || booking.last_name.includes(searchTerm))
+    if (!bookingList) throw new APIError("Bookings not found", 400, true);
 
-    return filteredBookingList;
+    return bookingList;
+  } catch (error) {
+    let errorMessage;
+
+    if (error instanceof Error) errorMessage = error.message;
+    else errorMessage = error;
+
+    throw new APIError(
+      `An error occurred when trying to get the bookings: ${errorMessage}`,
+      500,
+      true
+    );
   }
-}
+};
+
