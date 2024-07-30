@@ -4,7 +4,7 @@ const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://127.0.0.1:27017/mira
 
 mongoose.connect(MONGO_DB_URI)
 .then(() => {
-  console.info(`App was connected successfully to database`)
+  console.info(`App was connected successfully to the database`)
 })
 .catch((error) => {
   console.info(`An error ocurred while trying to connect to database: `, error);
