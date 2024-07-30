@@ -7,12 +7,12 @@ import { router as userRoutes } from './controllers/user.controller';
 import { router as roomRoutes } from './controllers/room.controller';
 import { router as contactRoutes } from './controllers/contact.controller';
 import { router as bookingRoutes } from './controllers/booking.controller';
-import { router as logRouter } from './controllers/log.controller';
+import { login, logout } from './controllers/log.controller';
 import { APIError } from './utils/APIError';
 import mustache from "mustache";
 import fs from 'fs';
 import cookieParser from "cookie-parser";
-import { generateToken } from './utils/token';
+import { headers } from './middlewares/response.middleware';
 require('./config/db.config');
 
 dotEnvConfig();
@@ -41,15 +41,15 @@ app.set('views', `${__dirname}/views`);
 
 app.use(checkRequestAuth);
 
-app.use('/login', logRouter);
-app.use('/logout', logRouter);
+app.post('/login', headers, login);
+app.post('/logout', headers, logout);
 app.get('/', (req: Request, res: Response) => {
   res.render('index', {user: req.user});
 });
 app.use('/users', isAuth, userRoutes);
 app.use('/rooms', isAuth, roomRoutes);
 app.use('/bookings', isAuth, bookingRoutes);
-app.use('/contacts', contactRoutes);
+app.use('/contacts', isAuth, contactRoutes);
 
 app.use((error: APIError, _req: Request, res: Response, _next: NextFunction) => {
   res.status(error.status || 500).json({message: error.safe ? error.message : "Application error"})

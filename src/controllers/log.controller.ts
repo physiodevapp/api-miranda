@@ -1,28 +1,36 @@
-import express, { Request, Response, NextFunction } from 'express';
-import { headers } from '../middlewares/response.middleware';
+import { Request, Response, NextFunction } from 'express';
 import { generateToken } from '../utils/token';
 import { APIError } from '../utils/APIError';
+import { User } from '../models/user.model';
 
-
-const login = (req: Request, res: Response, next: NextFunction) => {
-
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
 
-  if (email === "admin.miranda@example.com" && password === "0000") {
-    const payload = { email, password };
-    const token = generateToken(payload);
-  
-    res.cookie('token', token, { httpOnly: true });
+  const user = await User.findOne({email});
 
-    res.redirect(302, "/");
+  if (!user) {
+
+    res.status(404).json({ message: 'User not found' });
+
   } else {
-    const error = new APIError("Invalid credentials", 401, true);
-
-    next(error);
-  }   
+    const isValid = await user.checkPassword(password); 
+    if (isValid) {
+      const payload = { email, password };
+  
+      const token = generateToken(payload);
+    
+      res.cookie('token', token, { httpOnly: true });
+  
+      res.redirect(302, "/");
+    } else {
+      const error = new APIError("Invalid credentials", 401, true);
+  
+      next(error);
+    } 
+  }
 };
 
-const logout = (req: Request, res: Response, next: NextFunction) => {
+export const logout = (req: Request, res: Response, next: NextFunction) => {
   if (req.user) {
     res.clearCookie('token');
     
@@ -33,8 +41,3 @@ const logout = (req: Request, res: Response, next: NextFunction) => {
     next(error)
   }
 };
-
-export const router = express.Router();
-
-router.get("/login", headers, login);
-router.get("/logout", headers, logout);
