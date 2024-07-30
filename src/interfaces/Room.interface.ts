@@ -1,4 +1,7 @@
-export type RoomStatusType = "available" | "booked"
+export enum RoomStatusType {
+  Available = "available",
+  Booked = "booked"
+}
 
 export interface RoomInterface {
   id: string,
@@ -12,5 +15,7 @@ export interface RoomInterface {
   price_night: number,
   discount: number,
   status: RoomStatusType,
-  photos: string[]
+  photos: string[],
+  createdAt?: Date,
+  updatedAt?: Date,
 }

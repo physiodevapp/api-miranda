@@ -1,5 +1,8 @@
 
-export type ContactStatusType = "" | "archived";
+export enum ContactStatusType {
+  Unset = "",
+  Archived = "archived"
+}
 
 export interface ContactInterface {
   id: string,
@@ -10,5 +13,7 @@ export interface ContactInterface {
   phone: string,
   subject: string,
   message: string,
-  datetime: string
+  datetime: string,
+  createdAt?: Date,
+  updatedAt?: Date,
 };

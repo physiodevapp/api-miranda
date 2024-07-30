@@ -1,6 +1,13 @@
-export type UserStatusType = "active" | "inactive"
+export enum UserStatusType {
+  Active = "active",
+  Inactive = "inactive"
+}
 
-export type UserJobType = "Manager" | "Reservation desk" | "Room service"
+export enum UserJobType {
+  Manager = "Manager",
+  Reservation_desk = "Reservation desk",
+  Room_service = "Room service"
+}
 
 export interface UserInterface {
   [key: string]: any;
@@ -15,4 +22,6 @@ export interface UserInterface {
   job: UserJobType,
   password: string,
   email: string,
+  createdAt?: Date,
+  updatedAt?: Date,
 }
