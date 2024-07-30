@@ -1,10 +1,4 @@
-
-export enum BookingRoomType {
-  Single_bed = "Single Bed",
-  Double_bed = "Double Bed",
-  Double_superior = "Double Superior",
-  Suite = "Suite"
-}
+import { RoomType } from "./Room.interface";
 
 export enum BookingStatusType {
   Check_in = "check_in",
@@ -20,7 +14,7 @@ export interface BookingInterface {
   order_date: string,
   check_in: string,
   check_out: string,
-  room_type: BookingRoomType,
+  room_type: RoomType,
   room_number: number,
   status: BookingStatusType,
   special_request: string,

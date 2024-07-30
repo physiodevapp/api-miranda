@@ -11,10 +11,16 @@ export const getContactById = async (contactId: string): Promise<ContactInterfac
     return contact;
     
   } catch (error) {
-    if (error instanceof Error)
-      console.error(error.message)
-    else 
-      console.error(error)    
+    let errorMessage;
+
+    if (error instanceof Error) errorMessage = error.message;
+    else errorMessage = error;
+
+    throw new APIError(
+      `An error occurred when trying to get the contact: ${errorMessage}`,
+      500,
+      true
+    );    
   }
 }
 
@@ -27,9 +33,15 @@ export const getContactList = async (): Promise<ContactInterface[] | void>  => {
     return contactList
     
   } catch (error) {
-    if (error instanceof Error)
-      console.error(error.message)
-    else 
-      console.error(error)    
+    let errorMessage;
+
+    if (error instanceof Error) errorMessage = error.message;
+    else errorMessage = error;
+
+    throw new APIError(
+      `An error occurred when trying to get the contacts: ${errorMessage}`,
+      500,
+      true
+    );    
   }
 }

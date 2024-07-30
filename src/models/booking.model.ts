@@ -1,9 +1,9 @@
 import { Schema, model } from "mongoose";
 import {
   BookingInterface,
-  BookingRoomType,
   BookingStatusType,
 } from "../interfaces/Booking.interface";
+import { RoomType } from "../interfaces/Room.interface";
 
 const bookingSchema = new Schema<BookingInterface>(
   {
@@ -14,7 +14,7 @@ const bookingSchema = new Schema<BookingInterface>(
     check_out: { String, required: true },
     room_type: {
       String,
-      enum: Object.values(BookingRoomType),
+      enum: Object.values(RoomType),
       required: [true, "Room type is required"],
     },
     room_number: { Number, required: [true, "Room number is required"] },

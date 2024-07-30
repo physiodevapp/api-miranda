@@ -1,6 +1,7 @@
-import { BookingInterface, BookingRoomType, BookingStatusType } from '../interfaces/Booking.interface';
+import { BookingInterface, BookingStatusType } from '../interfaces/Booking.interface';
 import bookingDataList from '../data/bookings.json';
 import { APIError } from '../utils/APIError';
+import { RoomType } from '../interfaces/Room.interface';
 
 export class Booking implements BookingInterface {
   id: string;
@@ -9,7 +10,7 @@ export class Booking implements BookingInterface {
   order_date: string;
   check_in: string;
   check_out: string;
-  room_type: BookingRoomType;
+  room_type: RoomType;
   room_number: number;
   status: BookingStatusType;
   special_request: string;

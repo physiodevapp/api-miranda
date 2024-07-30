@@ -1,21 +1,21 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
-import { Room } from '../services/room.service';
+import { createRoom, deleteRoom, getRoomById, getRoomList, updateRoom } from '../services/room.service';
 
-const list = (_req: Request, res: Response, next: NextFunction) => {
+const list = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const roomList = Room.fetchAll();
+    const roomList = await getRoomList();
 
-    res.json(roomList);      
+    res.status(200).json(roomList);      
   } catch (error) {
     next(error);
   }
 }
 
-const create = (req: Request, res: Response, next: NextFunction) => {
+const create = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
-    const newRoom = Room.create(req.body);
+    const newRoom = await createRoom(req.body);
 
     res.status(201).json(newRoom);
   } catch (error) {
@@ -24,9 +24,9 @@ const create = (req: Request, res: Response, next: NextFunction) => {
 
 }
 
-const detail = (req: Request, res: Response, next: NextFunction) => {
+const detail = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const room = Room.fetchOne(req.params.roomId);
+    const room = await getRoomById(req.params.roomId);
     
     res.status(200).json(room);
   } catch (error) {
@@ -34,9 +34,9 @@ const detail = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-const deleteRoom = (req: Request, res: Response, next: NextFunction) => {
+const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    Room.delete(req.params.roomId)
+    await deleteRoom(req.params.roomId)
 
     res.status(200).json();
   } catch (error) {
@@ -44,9 +44,9 @@ const deleteRoom = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-const updateRoom = (req: Request, res: Response, next: NextFunction) => {
+const updateOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const updatedRoom = Room.update(req.params.roomId, req.body)
+    const updatedRoom = await updateRoom(req.params.roomId, req.body)
     
     res.status(200).json(updatedRoom);
   } catch (error) {
@@ -59,5 +59,5 @@ export const router = express.Router();
 router.get("/", headers, list);
 router.post("/", headers, create);
 router.get("/:roomId", headers, detail);
-router.delete("/:roomId", headers, deleteRoom);
-router.patch("/:roomId", headers, updateRoom);
+router.delete("/:roomId", headers, deleteOne);
+router.patch("/:roomId", headers, updateOne);

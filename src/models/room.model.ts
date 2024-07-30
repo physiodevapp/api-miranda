@@ -1,29 +1,38 @@
 import { Schema, model } from "mongoose";
-import { RoomInterface, RoomStatusType } from '../interfaces/Room.interface';
+import {
+  RoomFacility,
+  RoomInterface,
+  RoomStatusType,
+  RoomType,
+} from "../interfaces/Room.interface";
 
 const roomSchema = new Schema<RoomInterface>(
   {
-    number: { Number, required: true },
-    description: { String },
-    facilities: [String],
-    name: { String, required: true },
-    cancellation_policy: { String, required: true },
-    has_offer: { Boolean, default: false },
+    number: { type: Number, required: true },
+    description: { type: String },
+    facilities: { type: [String], enum: Object.values(RoomFacility) },
+    name: { type: String, required: true },
+    cancellation_policy: { type: String, required: true },
+    has_offer: { type: Boolean, default: false },
     type: {
-      String,
-      enum: ["Single Bed", "Double Bed", "Double Superior", "Suite"],
-      default: "Double Bed",
+      type: String,
+      enum: Object.values(RoomType),
+      default: RoomType.Double_bed,
     },
-    price_night: { Number, required: true },
-    discount: { Number, default: 0 },
-    status: { String, enum: Object.values(RoomStatusType), default: RoomStatusType.Available},
-    photos: [String],
+    price_night: { type: Number, required: true },
+    discount: { type: Number, default: 0 },
+    status: {
+      type: String,
+      enum: Object.values(RoomStatusType),
+      default: RoomStatusType.Available,
+    },
+    photos: { type: [String] },
   },
   {
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: function (doc, ret) {
+      transform: function (_doc, ret) {
         delete ret.__v;
         ret.id = ret._id;
         delete ret._id;
