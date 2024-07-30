@@ -1,7 +1,16 @@
 
-export type BookingRoomType = "Single Bed" | "Double Bed" | "Double Superior" | "Suite"
+export enum BookingRoomType {
+  Single_bed = "Single Bed",
+  Double_bed = "Double Bed",
+  Double_superior = "Double Superior",
+  Suite = "Suite"
+}
 
-export type BookingStatusType = "check_in" | "check_out" | "in_progress"
+export enum BookingStatusType {
+  Check_in = "check_in",
+  Check_out = "check_out",
+  In_progress = "in_progress"
+}
 
 
 export interface BookingInterface {
@@ -14,5 +23,7 @@ export interface BookingInterface {
   room_type: BookingRoomType,
   room_number: number,
   status: BookingStatusType,
-  special_request: string
+  special_request: string,
+  createdAt?: Date,
+  updatedAt?: Date,
 }
