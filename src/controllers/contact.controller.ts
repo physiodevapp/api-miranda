@@ -1,10 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
-import { Contact } from '../services/contact.service';
+import { getContactById, getContactList } from '../services/contact.service';
+// import { Contact } from '../services/contact.service';
 
-const list = (_req: Request, res: Response, next: NextFunction) => {
+const list = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const contactList = Contact.fetchAll();
+    // const contactList = Contact.fetchAll();
+    const contactList = await getContactList();
 
     res.json(contactList);      
   } catch (error) {
@@ -12,9 +14,10 @@ const list = (_req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-const detail = (req: Request, res: Response, next: NextFunction) => {
+const detail = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const contact = Contact.fetchOne(req.params.contactId);
+    // const contact = Contact.fetchOne(req.params.contactId);
+    const contact = await getContactById(req.params.contactId)
     
     res.status(200).json(contact);
   } catch (error) {

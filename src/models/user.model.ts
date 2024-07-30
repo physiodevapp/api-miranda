@@ -5,6 +5,7 @@ import {
   UserStatusType,
 } from "../interfaces/User.interface";
 import { emailRegex } from "../utils/validator";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema<UserInterface>(
   {
@@ -46,5 +47,9 @@ const userSchema = new Schema<UserInterface>(
     },
   }
 );
+
+userSchema.methods.checkPassword = function(password: string) {
+  return bcrypt.compare(password, this.password)
+}
 
 export const User = model<UserInterface>("User", userSchema);
