@@ -12,6 +12,7 @@ import mustache from "mustache";
 import fs from 'fs';
 import cookieParser from "cookie-parser";
 import { generateToken } from './utils/token';
+require('./config/db.config');
 
 dotEnvConfig();
 
