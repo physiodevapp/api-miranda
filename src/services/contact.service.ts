@@ -1,48 +1,35 @@
-import { ContactInterface, ContactStatusType } from '../interfaces/Contact.interface';
-import contactDataList from '../data/contacts.json';
+import { ContactInterface } from '../interfaces/Contact.interface';
 import { APIError } from '../utils/APIError';
+import { Contact } from '../models/contact.model';
 
-export class Contact implements ContactInterface {
-  id: string;
-  status: ContactStatusType;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
-  datetime: string;
-
-  constructor(contact: ContactInterface) {
-    this.id = contact.id;
-    this.status = contact.status;
-    this.first_name = contact.first_name;
-    this.last_name = contact.last_name;
-    this.email = contact.email;
-    this.phone = contact.phone;
-    this.subject = contact.subject;
-    this.message = contact.message;
-    this.datetime = contact.datetime;
-  }
-
-  static fetchOne (contactId: string): Contact | void {
-    const contactList = contactDataList as Contact[]
-    if (!contactList)
-      throw new APIError("There is no contacts data", 500, false);
-
-    const contact = contactList.find((contact: Contact) => contact.id = contactId)
+export const getContactById = async (contactId: string): Promise<ContactInterface | void>  => {
+  try {
+    const contact = await Contact.findById(contactId);
     if (!contact)
-      throw new APIError("Contact not found", 400, true)
+      throw new APIError("Contact not found", 400, true);
+      
+    return contact;
     
-    return contact
+  } catch (error) {
+    if (error instanceof Error)
+      console.error(error.message)
+    else 
+      console.error(error)    
   }
+}
 
-  static fetchAll (): Contact[] | void {
-    const contactList = contactDataList as Contact[];
-
+export const getContactList = async (): Promise<ContactInterface[] | void>  => {
+  try {
+    const contactList = await Contact.find();
     if (!contactList)
-      throw new APIError("There is no users data", 500, false);
+      throw new APIError("Contact not found", 400, true);
+      
+    return contactList
     
-    return contactList;
+  } catch (error) {
+    if (error instanceof Error)
+      console.error(error.message)
+    else 
+      console.error(error)    
   }
 }

@@ -12,7 +12,7 @@ declare global {
         token?: string; 
         [key: string]: any;
       };
-      user?: User;
+      user?: User | null;
     }
   }
 }

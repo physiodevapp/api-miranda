@@ -1,18 +1,22 @@
 import mongoose from "mongoose";
+
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://127.0.0.1:27017/miranda-hotel';
 
 mongoose.connect(MONGO_DB_URI)
 .then(() => {
-  console.log(`App was connected successfully to database`)
+  console.info(`App was connected successfully to the database`)
 })
 .catch((error) => {
-  console.log(`An error ocurred while trying to connect to database: `, error)
+  console.info(`An error ocurred while trying to connect to database: `, error);
+
+  process.exit(1);
 })
 
 process.on("SIGINT", function() {
   mongoose.connection.close()
   .then(() => {
-    console.log(`Mongoose was disconnected on App termination`)
-    process.exit(0)
+    console.info(`Disconnected successfully from the database`);
+
+    process.exit(0);
   })
 })

@@ -7,11 +7,12 @@ import { router as userRoutes } from './controllers/user.controller';
 import { router as roomRoutes } from './controllers/room.controller';
 import { router as contactRoutes } from './controllers/contact.controller';
 import { router as bookingRoutes } from './controllers/booking.controller';
+import { login, logout } from './controllers/log.controller';
 import { APIError } from './utils/APIError';
 import mustache from "mustache";
 import fs from 'fs';
 import cookieParser from "cookie-parser";
-import { generateToken } from './utils/token';
+import { headers } from './middlewares/response.middleware';
 require('./config/db.config');
 
 dotEnvConfig();
@@ -40,34 +41,8 @@ app.set('views', `${__dirname}/views`);
 
 app.use(checkRequestAuth);
 
-app.post('/login', (req: Request, res: Response, next: NextFunction) => {
-
-  const { email, password } = req.body;
-
-  if (email === "admin.miranda@example.com" && password === "0000") {
-    const payload = { email, password };
-    const token = generateToken(payload);
-  
-    res.cookie('token', token, { httpOnly: true });
-
-    res.redirect(302, "/");
-  } else {
-    const error = new APIError("Invalid credentials", 401, true);
-
-    next(error);
-  }   
-});
-app.post('/logout', (req: Request, res: Response, next: NextFunction) => {
-  if (req.user) {
-    res.clearCookie('token');
-    
-    res.redirect(302, "/");
-  } else {
-    const error = new APIError("User is not authenticated", 401, true);
-
-    next(error)
-  }
-});
+app.post('/login', headers, login);
+app.post('/logout', headers, logout);
 app.get('/', (req: Request, res: Response) => {
   res.render('index', {user: req.user});
 });
