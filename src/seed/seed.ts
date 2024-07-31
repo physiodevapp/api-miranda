@@ -107,9 +107,8 @@ const seedContacts = async () => {
     await Contact.deleteMany({});
     console.info('Contact collection cleared');
 
-    const contacts = [];
-    for (let i = 0; i < 10; i++) {
-      contacts.push({
+    const contactPromises = Array.from({ length: 10 }).map(() => {
+      return Contact.create({
         status: getRandomContactStatus(),
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
@@ -118,11 +117,10 @@ const seedContacts = async () => {
         subject: faker.lorem.words(3),
         message: faker.lorem.paragraph(),
         datetime: faker.date.past().toISOString(),
-      });
-    }
+      })
+    });
 
-    await Contact.insertMany(contacts);
-
+    await Promise.all(contactPromises)
     console.info('10 contacts have been seeded');
   } catch (error) {
     console.error('Error seeding contacts:', error);
@@ -136,9 +134,8 @@ const seedUsers = async () => {
     await User.deleteMany({});
     console.info('User collection cleared');    
     
-    for (let i = 0; i < 10; i++) {
-      const password = faker.internet.password();
-      const user = new User({
+    const userPromises = Array.from({ length: 10 }).map(() => {
+      return User.create({
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
         photo: faker.image.avatar(), 
@@ -147,15 +144,14 @@ const seedUsers = async () => {
         telephone: faker.phone.number(),
         status: getRandomUserStatus(),
         job: getRandomUserJob(),
-        password: password,
+        password: faker.internet.password(),
         email: faker.internet.email(),
       });
+    });
 
-      await user.save();
-    }
+    await Promise.all(userPromises);
 
-    const examplePassword = "0000";
-    const user = new User({
+    await User.create({
       first_name: "Admin",
       last_name: "Miranda",
       photo: faker.image.avatar(), 
@@ -164,11 +160,9 @@ const seedUsers = async () => {
       telephone: faker.phone.number(),
       status: getRandomUserStatus(),
       job: getRandomUserJob(),
-      password: examplePassword,
+      password: "0000",
       email: "admin.miranda@example.com",
     });
-
-    await user.save();
 
     console.info('11 users have been seeded');
   } catch (error) {
@@ -197,12 +191,11 @@ const seedRooms = async () => {
         status: getRandomRoomStatusType(),
         photos: [faker.image.url(), faker.image.url()]
       });
-    });
-
-    
-    console.info('10 rooms have been seeded');
+    });    
     
     const rooms = await Promise.all(roomPromises);
+    console.info('10 rooms have been seeded');
+
     return rooms.map(room => room._id); 
   } catch (error) {
     console.error('Error seeding rooms:', error);
