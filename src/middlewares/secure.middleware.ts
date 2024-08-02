@@ -15,12 +15,12 @@ export const checkRequestAuth = (async (req: Request, res: Response, next: NextF
     if (typeof decoded.sub === 'object' && decoded.sub !== null && 'email' in decoded.sub && 'password' in decoded.sub) {
       req.user = await User.findOne({email: decoded.sub.email});
     } else {
-      return next(new APIError("Invalid schema of the token", 401, false));
+      return next(new APIError({message: "Invalid schema of the token", status: 401, safe: false}));
     }
   } catch (error) {
     res.clearCookie('token');
 
-    return next(new APIError("Invalid token", 401, true));
+    return next(new APIError({message: "Invalid token", status: 401, safe: true}));
   }
 
   next(); 
@@ -31,7 +31,7 @@ export const isAuth = (req: Request, _res: Response, next: NextFunction) => {
   if (req.user) {
     next()
   } else {
-    const error = new APIError("Protected route", 401, true);
+    const error = new APIError({message: "Protected route", status: 401, safe: true});
 
     next(error);
   }

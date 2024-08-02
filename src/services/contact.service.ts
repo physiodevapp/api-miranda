@@ -6,21 +6,13 @@ export const getContactById = async (contactId: string): Promise<ContactInterfac
   try {
     const contact = await Contact.findById(contactId);
     if (!contact)
-      throw new APIError("Contact not found", 400, true);
+      throw new APIError({message: "Contact not found", status: 400, safe: true});
       
     return contact;
     
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the contact: ${errorMessage}`,
-      500,
-      true
-    );    
+    
+    throw error;    
   }
 }
 
@@ -28,20 +20,12 @@ export const getContactList = async (): Promise<ContactInterface[] | void>  => {
   try {
     const contactList = await Contact.find();
     if (!contactList)
-      throw new APIError("Contact not found", 400, true);
+      throw new APIError({message: "Contact not found", status: 400, safe: true});
       
     return contactList
     
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the contacts: ${errorMessage}`,
-      500,
-      true
-    );    
+    
+    throw error;   
   }
 }

@@ -8,32 +8,7 @@ import { Room } from "../models/room.model";
 import { RoomFacility, RoomStatusType, RoomType } from "../interfaces/Room.interface";
 import { BookingStatusType } from "../interfaces/Booking.interface";
 import { Booking } from "../models/booking.model";
-
-const connectDB = async () => {
-  const MONGO_DB_URI = process.env.MONGO_DB_URI || "mongodb://127.0.0.1:27017/miranda-hotel";
-
-  try {
-    await mongoose.connect(MONGO_DB_URI);
-
-    console.info(`Connected successfully to the database`);
-  } catch (error) {
-    console.error(`An error ocurred while trying to connect to the database: `, error);
-
-    process.exit(1);
-  }
-};
-
-const disconnectDB = async () => {
-  try {
-    await mongoose.disconnect();
-
-    console.info('Disconnected successfully from the database');
-  } catch (error) {
-    console.error('Error disconnecting from the database:', error);
-
-    process.exit(1);
-  }
-};
+import { connectDB, disconnectDB } from "../config/db.config";
 
 const getRandomContactStatus = (): ContactStatusType => {
   const statuses = [ContactStatusType.Unset, ContactStatusType.Archived];
@@ -105,7 +80,7 @@ const determineBookingStatus = (checkInDate: string, checkOutDate: string) => {
 const seedContacts = async () => {
   try {
     await Contact.deleteMany({});
-    console.info('Contact collection cleared');
+    // console.info('Contact collection cleared');
 
     const contactPromises = Array.from({ length: 10 }).map(() => {
       return Contact.create({
@@ -121,7 +96,7 @@ const seedContacts = async () => {
     });
 
     await Promise.all(contactPromises)
-    console.info('10 contacts have been seeded');
+    // console.info('10 contacts have been seeded');
   } catch (error) {
     console.error('Error seeding contacts:', error);
     
@@ -132,7 +107,7 @@ const seedContacts = async () => {
 const seedUsers = async () => {
   try {
     await User.deleteMany({});
-    console.info('User collection cleared');    
+    // console.('User collection cleared');    
     
     const userPromises = Array.from({ length: 10 }).map(() => {
       return User.create({
@@ -149,9 +124,9 @@ const seedUsers = async () => {
       });
     });
 
-    await Promise.all(userPromises);
+    const userList = await Promise.all(userPromises);
 
-    await User.create({
+    const customUser = await User.create({
       first_name: "Admin",
       last_name: "Miranda",
       photo: faker.image.avatar(), 
@@ -164,7 +139,9 @@ const seedUsers = async () => {
       email: "admin.miranda@example.com",
     });
 
-    console.info('11 users have been seeded');
+    userList.push(customUser)
+
+    // console.('11 users have been seeded');
   } catch (error) {
     console.error('Error seeding contacts:', error);
     
@@ -175,7 +152,7 @@ const seedUsers = async () => {
 const seedRooms = async () => {
   try {
     await Room.deleteMany({});
-    console.info('Room collection cleared');    
+    // console.('Room collection cleared');    
 
     const roomPromises = Array.from({ length: 10 }).map(( _, index ) => {
       return Room.create({
@@ -194,7 +171,7 @@ const seedRooms = async () => {
     });    
     
     const rooms = await Promise.all(roomPromises);
-    console.info('10 rooms have been seeded');
+    // console.('10 rooms have been seeded');
 
     return rooms.map(room => room._id); 
   } catch (error) {
@@ -209,7 +186,7 @@ const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
 
   try {
     await Booking.deleteMany({});
-    console.info('Booking collection cleared');    
+    // console.('Booking collection cleared');    
     
     const bookings = [];
     for (let i = 0; i < 10; i++) {
@@ -244,7 +221,7 @@ const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
 
     await Booking.insertMany(bookings)
 
-    console.info('10 bookings have been seeded');
+    // console.('10 bookings have been seeded');
   } catch (error) {
     console.error('Error seeding bookings:', error);
     
@@ -252,24 +229,27 @@ const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
   }
 }
 
-const seedData = async() => {
-  await connectDB();
 
-  await Promise.all([
-    seedContacts(),
-    seedUsers()
-  ])
+const createSeedData = async () => {
+  await seedContacts();
+
+  await seedUsers();
 
   const roomIds = await seedRooms();
 
   await seedBookings(roomIds);
-
-  await disconnectDB();
-
-  process.exit(0);
 }
 
-seedData();
+export const seedData = async() => {
+  await connectDB();
+
+  await createSeedData();
+
+  await disconnectDB();
+}
+
+if (process.env.NODE_ENV !== 'test') 
+  seedData();
 
 
 

@@ -4,11 +4,11 @@ import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
 import { createUser, deleteUser, getUserById, getUserList, updateUser } from '../services/user.service';
 
-
 const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const searchTerm =  typeof req.query?.search_term === "string" ? req.query?.search_term : "";
-    const userList = await getUserList(searchTerm);
+    console.log(searchTerm)
+    const userList = await getUserList();
 
     res.status(200).json(userList);      
   } catch (error) {

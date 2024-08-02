@@ -7,20 +7,12 @@ export const getBookingById = async (
 ): Promise<BookingInterface | void> => {
   try {
     const booking = await Booking.findById(bookingId).populate('room');
-    if (!booking) throw new APIError("Booking not found", 400, true);
+    if (!booking) throw new APIError({message: "Booking not found", status: 400, safe: true});
 
     return booking;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the booking: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
@@ -36,20 +28,12 @@ export const getBookingList = async (
       ],
     }).populate('room');
 
-    if (!bookingList) throw new APIError("Bookings not found", 400, true);
+    if (!bookingList) throw new APIError({message: "Bookings not found", status: 400, safe: true});
 
     return bookingList;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the bookings: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
