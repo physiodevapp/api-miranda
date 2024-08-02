@@ -5,7 +5,8 @@
   "scripts": {
     "start": "ts-node server.ts",
     "dev": "nodemon",
-    "test": "jest"
+    "test": "jest",
+    "seed": "ts-node src/seed/seed.ts"
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +21,7 @@
     "@types/mustache-express": "^1.2.5",
     "@types/node": "^20.14.11",
     "@types/supertest": "^6.0.2",
+    "mongodb-memory-server": "^10.0.0",
     "nodemon": "^3.1.4",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.3",
@@ -34,7 +36,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.5.1",
+    "mockingoose": "^2.16.2",
+    "mongoose": "^8.5.2",
     "morgan": "^1.10.0",
     "mustache": "^4.2.0",
     "sass": "^1.77.8",

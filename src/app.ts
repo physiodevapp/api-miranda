@@ -1,5 +1,4 @@
 
-import { config as dotEnvConfig } from 'dotenv';
 import logger from 'morgan';
 import express, { Response, Request, NextFunction } from 'express';
 import { checkRequestAuth, isAuth } from "./middlewares/secure.middleware";
@@ -13,9 +12,13 @@ import mustache from "mustache";
 import fs from 'fs';
 import cookieParser from "cookie-parser";
 import { headers } from './middlewares/response.middleware';
-require('./config/db.config');
+import mongoose from 'mongoose';
+// const loadEnvConfig = require('../loadEnvConfig');
 
-dotEnvConfig();
+// loadEnvConfig();
+
+if (process.env.NODE_ENV !== 'test') 
+  require('./config/db.config');
 
 export const app = express();
 
@@ -51,7 +54,50 @@ app.use('/rooms', isAuth, roomRoutes);
 app.use('/bookings', isAuth, bookingRoutes);
 app.use('/contacts', isAuth, contactRoutes);
 
-app.use((error: APIError, _req: Request, res: Response, _next: NextFunction) => {
-  res.status(error.status || 500).json({message: error.safe ? error.message : "Application error"})
+app.use((_req, _res, next) => {
+  next(new APIError({message: 'Resource not found', status: 404, safe: true}))
+})
+
+app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
+  if (error instanceof mongoose.Error.ValidationError) {
+    error = new APIError({message: error.message, status: 400, safe: true})
+  } else if (error instanceof mongoose.Error.CastError
+    && error.path === '_id') {
+    const modelNameMatch = error.stack!.match(/for model "(.+?)"/);
+    const modelName = modelNameMatch ? modelNameMatch[1] : undefined;
+
+    error = new APIError({message: `${modelName} not found`, status: 404, safe: true})
+  } else if (error.message.includes('E11000')) {
+    Object.keys(error.keyValue).forEach((key) => error.keyValue[key] = "Already exists")
+    
+    error = new APIError({message: "Duplicate key error", status: 409, safe: true, errors: error.keyValue})
+  } else if (!error.status) {
+    error = new APIError({message: error.message || "Internal Server Error", status: 500, safe: true})
+  }
+
+  interface errorData {
+    message: string,
+    errors?: {
+      [key: string]: string;
+    };
+  }
+
+  const errorData: errorData = {
+    message: error.safe ? error.message : "Application error",
+    // errors: {}
+  }
+
+  if (error as APIError && error.errors) {
+    const errors = Object.keys(error.errors)
+      .reduce((errors, errorKey) => {
+        errors![errorKey] = error.errors[errorKey]?.message || error.errors[errorKey]
+
+        return errors
+      }, {} as {[key: string]: string});
+
+      errorData.errors = errors
+  }
+
+  res.status(error.status || 500).json(errorData)
 });
 

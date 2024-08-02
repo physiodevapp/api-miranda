@@ -8,25 +8,17 @@ export const getUserById = async (
 ): Promise<UserInterface | void> => {
   try {
     const user = await User.findById(userId);
-    if (!user) throw new APIError("User not found", 400, true);
+    if (!user) throw new APIError({message: "User not found", status: 400, safe: true});
 
     return user;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the user: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
 export const getUserList = async (
-  searchTerm: string
+  searchTerm: string = ""
 ): Promise<UserInterface[] | void> => {
   try {
     const searchRegex = new RegExp(searchTerm, "i");
@@ -37,20 +29,12 @@ export const getUserList = async (
       ],
     });
 
-    if (!userList) throw new APIError("Contacts not found", 400, true);
+    if (!userList) throw new APIError({message: "Contacts not found", status: 400, safe: true});
 
     return userList;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the users: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
@@ -62,16 +46,8 @@ export const createUser = async (
 
     return newUser;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to create a new user: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
@@ -80,16 +56,8 @@ export const deleteUser = async (userId: string): Promise<void> => {
     const objectId = new ObjectId(userId);
     await User.deleteOne({ _id: objectId });
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get delete the user: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
@@ -100,7 +68,7 @@ export const updateUser = async (
   try {
     const updateUser = await User.findById(userId);
 
-    if (!updateUser) throw new APIError("User not found", 404, true);
+    if (!updateUser) throw new APIError({message: "User not found", status: 404, safe: true});
 
     Object.assign(updateUser, userData);
 
@@ -108,15 +76,7 @@ export const updateUser = async (
 
     return updatedUser;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get update the user: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };

@@ -11,20 +11,12 @@ export const getRoomById = async (
 ): Promise<RoomInterface | void> => {
   try {
     const room = await Room.findById(roomId);
-    if (!room) throw new APIError("Room not found", 400, true);
+    if (!room) throw new APIError({message: "Room not found", status: 400, safe: true});
 
     return room;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the room: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
@@ -32,20 +24,12 @@ export const getRoomList = async (): Promise<RoomInterface[] | void> => {
   try {
     const roomList = await Room.find();
 
-    if (!roomList) throw new APIError("Rooms not found", 400, true);
+    if (!roomList) throw new APIError({message: "Rooms not found", status: 400, safe: true});
 
     return roomList;
   } catch (error) {
-    let errorMessage;
 
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get the rooms: ${errorMessage}`,
-      500,
-      true
-    );
+    throw error;
   }
 };
 
@@ -57,16 +41,8 @@ export const createRoom = async (
 
     return newRoom;
   } catch (error) {
-    let errorMessage;
 
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to create a new room: ${errorMessage}`,
-      500,
-      true
-    );
+    throw error
   }
 };
 
@@ -75,16 +51,8 @@ export const deleteRoom = async (roomId: string): Promise<void> => {
     const objectId = new ObjectId(roomId);
     await Room.deleteOne({ _id: objectId });
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to delete the room: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };
 
@@ -95,7 +63,7 @@ export const updateRoom = async (
   try {
     const updateRoom = await Room.findById(roomId);
 
-    if (!updateRoom) throw new APIError("User not found", 404, true);
+    if (!updateRoom) throw new APIError({message: "User not found", status: 404, safe: true});
 
     Object.assign(updateRoom, roomData);
 
@@ -103,15 +71,7 @@ export const updateRoom = async (
 
     return updatedRoom;
   } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) errorMessage = error.message;
-    else errorMessage = error;
-
-    throw new APIError(
-      `An error occurred when trying to get update the room: ${errorMessage}`,
-      500,
-      true
-    );
+    
+    throw error;
   }
 };

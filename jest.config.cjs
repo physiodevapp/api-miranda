@@ -3,4 +3,8 @@ module.exports = {
   "transform": {
     "^.+.tsx?$": ["ts-jest",{}],
   },
+  "setupFilesAfterEnv": ["./jest.setup.cjs"],
+  "setupFiles": [
+    './jest.env.cjs'
+  ]
 }

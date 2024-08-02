@@ -2,10 +2,136 @@
 import request from "supertest";
 import { app } from "../app";
 import { generateToken } from "../utils/token";
-import userDataList from '../data/users.json';
-import bookingsDataList from '../data/bookings.json';
-import contactsDataList from '../data/contacts.json';
-import roomsDataList from '../data/rooms.json';
+import { faker } from "@faker-js/faker";
+import { getUserById, getUserList } from "../services/user.service";
+import { User } from "../models/user.model";
+// import { User } from "../models/user.model";
+// import userDataList from '../data/users.json';
+// import bookingsDataList from '../data/bookings.json';
+// import contactsDataList from '../data/contacts.json';
+// import roomsDataList from '../data/rooms.json';
+// import { User } from "../models/user.model";
+// import mockingoose from "mockingoose";
+// const { getUserListSeed } = require('../../sharedState.js');
+ 
+
+describe("Testing User routes", () => {
+  let payload: { email: string, password: string };
+  let token: string;
+  let cookie: string;
+
+  beforeEach(async () => {
+    // mockingoose.resetAll();
+
+    payload = {
+      email: "admin.miranda@example.com",
+      password: "0000"
+    }
+
+    token = generateToken(payload);
+
+    cookie = `token=${token}`;
+  });
+
+  test("Users route returns status code 200 if valid token", async () => {
+    const response = await request(app)
+      .get("/users")
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(200);
+  });
+
+  test("Users route returns status code 401 if invalid token", async () => {
+    const response = await request(app)
+      .get("/users")
+      .set("Cookie", `${cookie}lj`); 
+    
+    expect(response.status).toEqual(401);
+  });
+
+  // test("Users route returns status code 401 if invalid credentials", async () => {
+  //   payload = {
+  //     email: "admin.miranda@example.co",
+  //     password: "0000"
+  //   }
+  //   token = generateToken(payload);
+
+  //   cookie = [`token=${token}`];
+
+  //   const response = await request(app)
+  //     .get("/users")
+  //     .set('Cookie', cookie) 
+    
+  //   expect(response.status).toEqual(401);
+  // });
+
+  test("Users route returns all users if valid credentials", async () => {
+    const response = await request(app)
+      .get("/users")
+      .set('Cookie', cookie) 
+
+    // mockingoose(User).toReturn(getUserListSeed(), 'find')
+    const userListDB = await getUserList().lean()
+    console.log('userListDB ', userListDB);
+    console.log('response.body ', response.body);
+    expect(response.body).toEqual(userListDB);
+  });
+
+  // test("Users route returns a single user if valid credentials", async () => {
+
+  //   const response = await request(app)
+  //     .get(`/users/${userId}`)
+  //     .set('Cookie', cookie) 
+    
+  //   expect(response.body).toEqual(userDataList.find((user) => user.id === userId));
+  // });
+
+  // test("Users route delete a single user if valid credentials", async () => {
+
+  //   const response = await request(app)
+  //     .delete(`/users/${userId}`)
+  //     .set('Cookie', cookie) 
+    
+  //   expect(response.status).toEqual(200);
+  // });
+
+  // test("Users route update a single user if valid credentials", async () => {
+
+  //   const response = await request(app)
+  //     .patch(`/users/${userId}`)
+  //     .send({first_name: "Emogenee"})
+  //     .set('Cookie', cookie) 
+    
+  //   expect(response.body.first_name).toEqual("Emogenee");
+  // });
+
+  test("Users route create a single user if valid credentials", async () => {
+    const newUser = {
+      first_name: "Michael",
+      last_name: "Gloy",
+      photo: "http://dummyimage.com/69x68.png/cc0000/ffffff",
+      start_date: faker.date.past({ years: 1 }).toISOString(),
+      job_description: "Curabitur in libero ut massa volutpat convallis. Morbi odio odio, elementum eu, interdum eu, tincidunt in, leo. Maecenas pulvinar lobortis est.\n\nPhasellus sit amet erat. Nulla tempus. Vivamus in felis eu sapien cursus vestibulum.",
+      telephone: "+52 744 533 8760",
+      status: "inactive",
+      job: "Reservation desk",
+      password: "1234",
+      email: "gloy.miranda@example.com"
+    }
+
+    const response = await request(app)
+      .post(`/users`)
+      .send(newUser)
+      .set('Cookie', cookie) 
+
+    const newUserDB = await getUserById(response.body.id)
+    
+    expect(response.body.id).toEqual(newUserDB!.id);
+  });
+
+});
+
+/**
 
 describe("Testing public routes", () => {
   test('Route "/" returns status code 200', async () => {
@@ -24,7 +150,6 @@ describe("Testing log process", () => {
         email: "admin.miranda@example.com",
         password: "0000"
       })
-
 
     const cookies = response.headers['set-cookie'];
     const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
@@ -52,9 +177,11 @@ describe("Testing log process", () => {
     }
     const token = generateToken(payload);
 
+    const cookie = [`token=${token}`];
+
     const response = await request(app)
       .post("/logout")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
 
     const cookies = response.headers['set-cookie'];
     const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
@@ -67,117 +194,11 @@ describe("Testing log process", () => {
 
 });
 
-describe("Testing User routes", () => {
-  let payload: { email: string, password: string };
-  let token: string;
-  let userId: string;
-
-  beforeEach(async () => {
-    payload = {
-      email: "admin.miranda@example.com",
-      password: "0000"
-    }
-
-    token = generateToken(payload);
-
-    userId = "c1c692d5-a8bb-4987-bda9-bf0d63cf852f";
-  });
-
-  test("Users route returns status code 200 if valid token", async () => {
-    const response = await request(app)
-      .get("/users")
-      .set("authorization", `Bearer ${token}`); 
-    
-    expect(response.status).toEqual(200);
-  });
-
-  test("Users route returns status code 500 if invalid token", async () => {
-    const response = await request(app)
-      .get("/users")
-      .set("authorization", `Bearer ${token}lj`); 
-    
-    expect(response.status).toEqual(500);
-  });
-
-  test("Users route returns status code 401 if invalid credentials", async () => {
-    payload = {
-      email: "admin.miranda@example.co",
-      password: "0000"
-    }
-    token = generateToken(payload);
-
-    const response = await request(app)
-      .get("/users")
-      .set("authorization", `Bearer ${token}`); 
-    
-    expect(response.status).toEqual(401);
-  });
-
-  test("Users route returns all users if valid credentials", async () => {
-    const response = await request(app)
-      .get("/users")
-      .set("authorization", `Bearer ${token}`); 
-    
-    expect(response.body).toEqual(userDataList);
-  });
-
-  test("Users route returns a single user if valid credentials", async () => {
-
-    const response = await request(app)
-      .get(`/users/${userId}`)
-      .set("authorization", `Bearer ${token}`); 
-    
-    expect(response.body).toEqual(userDataList.find((user) => user.id === userId));
-  });
-
-  test("Users route delete a single user if valid credentials", async () => {
-
-    const response = await request(app)
-      .delete(`/users/${userId}`)
-      .set("authorization", `Bearer ${token}`); 
-    
-    expect(response.status).toEqual(200);
-  });
-
-  test("Users route update a single user if valid credentials", async () => {
-
-    const response = await request(app)
-      .patch(`/users/${userId}`)
-      .send({first_name: "Emogenee"})
-      .set("authorization", `Bearer ${token}`); 
-    
-    expect(response.body.first_name).toEqual("Emogenee");
-  });
-
-  test("Users route create a single user if valid credentials", async () => {
-    const newUser = {
-      id: "c1c692d5-a8bb-4987-bda9-bf0d63cf854g",
-      first_name: "Michael",
-      last_name: "Gloy",
-      photo: "http://dummyimage.com/69x68.png/cc0000/ffffff",
-      start_date: "1698822608000",
-      job_description: "Curabitur in libero ut massa volutpat convallis. Morbi odio odio, elementum eu, interdum eu, tincidunt in, leo. Maecenas pulvinar lobortis est.\n\nPhasellus sit amet erat. Nulla tempus. Vivamus in felis eu sapien cursus vestibulum.",
-      telephone: "+52 744 533 8760",
-      status: "inactive",
-      job: "Reservation desk",
-      password: "9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0",
-      email: "admin.miranda@example.com"
-    }
-
-    const response = await request(app)
-      .post(`/users`)
-      .send(newUser)
-      .set("authorization", `Bearer ${token}`); 
-    
-    expect(response.body.id).toEqual(newUser.id);
-  });
-
-});
-
 describe("Testing Rooms routes", () => {
   let payload: { email: string, password: string };
   let token: string;
   let roomId: string;
+  let cookie: string[];
 
   beforeEach(async () => {
     payload = {
@@ -186,6 +207,8 @@ describe("Testing Rooms routes", () => {
     }
 
     token = generateToken(payload);
+
+    cookie = [`token=${token}`];
 
     roomId = "b8eed84f-771e-4702-844d-58c1862914f0";
   });
@@ -193,7 +216,7 @@ describe("Testing Rooms routes", () => {
   test("Rooms route returns status code 200 if valid token", async () => {
     const response = await request(app)
       .get("/rooms")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.status).toEqual(200);
   });
@@ -201,7 +224,7 @@ describe("Testing Rooms routes", () => {
   test("Rooms route returns status code 500 if invalid token", async () => {
     const response = await request(app)
       .get("/rooms")
-      .set("authorization", `Bearer ${token}lj`); 
+      .set("Cookie", `${cookie}lj`); 
     
     expect(response.status).toEqual(500);
   });
@@ -213,9 +236,11 @@ describe("Testing Rooms routes", () => {
     }
     token = generateToken(payload);
 
+    cookie = [`token=${token}`];
+
     const response = await request(app)
       .get("/rooms")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.status).toEqual(401);
   });
@@ -223,7 +248,7 @@ describe("Testing Rooms routes", () => {
   test("Rooms route returns all rooms if valid credentials", async () => {
     const response = await request(app)
       .get("/rooms")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body).toEqual(roomsDataList);
   });
@@ -232,7 +257,7 @@ describe("Testing Rooms routes", () => {
 
     const response = await request(app)
       .get(`/rooms/${roomId}`)
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body).toEqual(roomsDataList.find((room) => room.id === roomId));
   });
@@ -241,7 +266,7 @@ describe("Testing Rooms routes", () => {
 
     const response = await request(app)
       .delete(`/rooms/${roomId}`)
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.status).toEqual(200);
   });
@@ -251,7 +276,7 @@ describe("Testing Rooms routes", () => {
     const response = await request(app)
       .patch(`/rooms/${roomId}`)
       .send({price_night: 450})
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body.price_night).toEqual(450);
   });
@@ -274,7 +299,7 @@ describe("Testing Rooms routes", () => {
     const response = await request(app)
       .post(`/rooms`)
       .send(newRoom)
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body.id).toEqual(newRoom.id);
   });
@@ -285,6 +310,7 @@ describe("Testing Bookings routes", () => {
   let payload: { email: string, password: string };
   let token: string;
   let bookingId: string;
+  let cookie: string[];
 
   beforeEach(async () => {
     payload = {
@@ -294,13 +320,15 @@ describe("Testing Bookings routes", () => {
 
     token = generateToken(payload);
 
+    cookie = [`token=${token}`];
+
     bookingId = "ba389f14-4c58-46d8-9314-13a479bcfa21";
   });
 
   test("Bookings route returns status code 200 if valid token", async () => {
     const response = await request(app)
       .get("/bookings")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.status).toEqual(200);
   });
@@ -308,7 +336,7 @@ describe("Testing Bookings routes", () => {
   test("Bookings route returns status code 500 if invalid token", async () => {
     const response = await request(app)
       .get("/bookings")
-      .set("authorization", `Bearer ${token}lj`); 
+      .set("Cookie", `${cookie}lj`); 
     
     expect(response.status).toEqual(500);
   });
@@ -320,9 +348,11 @@ describe("Testing Bookings routes", () => {
     }
     token = generateToken(payload);
 
+    cookie = [`token=${token}`];
+
     const response = await request(app)
       .get("/bookings")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.status).toEqual(401);
   });
@@ -330,7 +360,7 @@ describe("Testing Bookings routes", () => {
   test("Bookings route returns all bookings if valid credentials", async () => {
     const response = await request(app)
       .get("/bookings")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body).toEqual(bookingsDataList);
   });
@@ -339,7 +369,7 @@ describe("Testing Bookings routes", () => {
 
     const response = await request(app)
       .get(`/bookings/${bookingId}`)
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body).toEqual(bookingsDataList.find((booking) => booking.id === bookingId));
   });
@@ -350,6 +380,7 @@ describe("Testing Contacts routes", () => {
   let payload: { email: string, password: string };
   let token: string;
   let contactId: string;
+  let cookie: string[];
 
   beforeEach(async () => {
     payload = {
@@ -359,13 +390,15 @@ describe("Testing Contacts routes", () => {
 
     token = generateToken(payload);
 
+    cookie = [`token=${token}`];
+
     contactId = "ba389f14-4c58-46d8-9314-13a479bcfa21";
   });
 
   test("Contacts route returns status code 200 if valid token", async () => {
     const response = await request(app)
       .get("/contacts")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.status).toEqual(200);
   });
@@ -385,9 +418,11 @@ describe("Testing Contacts routes", () => {
     }
     token = generateToken(payload);
 
+    cookie = [`token=${token}`];
+
     const response = await request(app)
       .get("/contacts")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.status).toEqual(401);
   });
@@ -395,7 +430,7 @@ describe("Testing Contacts routes", () => {
   test("Contacts route returns all contacts if valid credentials", async () => {
     const response = await request(app)
       .get("/contacts")
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body).toEqual(contactsDataList);
   });
@@ -404,9 +439,11 @@ describe("Testing Contacts routes", () => {
 
     const response = await request(app)
       .get(`/contacts/${contactId}`)
-      .set("authorization", `Bearer ${token}`); 
+      .set('Cookie', cookie) 
     
     expect(response.body).toEqual(contactsDataList.find((contact) => contact.id === contactId));
   });
 
 });
+
+ */

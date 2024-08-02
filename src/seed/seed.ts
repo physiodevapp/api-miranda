@@ -8,32 +8,10 @@ import { Room } from "../models/room.model";
 import { RoomFacility, RoomStatusType, RoomType } from "../interfaces/Room.interface";
 import { BookingStatusType } from "../interfaces/Booking.interface";
 import { Booking } from "../models/booking.model";
+import { connectDB, disconnectDB } from "../config/db.config";
+// const loadEnvConfig = require('../../loadEnvConfig');
 
-const connectDB = async () => {
-  const MONGO_DB_URI = process.env.MONGO_DB_URI || "mongodb://127.0.0.1:27017/miranda-hotel";
-
-  try {
-    await mongoose.connect(MONGO_DB_URI);
-
-    console.info(`Connected successfully to the database`);
-  } catch (error) {
-    console.error(`An error ocurred while trying to connect to the database: `, error);
-
-    process.exit(1);
-  }
-};
-
-const disconnectDB = async () => {
-  try {
-    await mongoose.disconnect();
-
-    console.info('Disconnected successfully from the database');
-  } catch (error) {
-    console.error('Error disconnecting from the database:', error);
-
-    process.exit(1);
-  }
-};
+// loadEnvConfig()
 
 const getRandomContactStatus = (): ContactStatusType => {
   const statuses = [ContactStatusType.Unset, ContactStatusType.Archived];
@@ -149,9 +127,9 @@ const seedUsers = async () => {
       });
     });
 
-    await Promise.all(userPromises);
+    const userList = await Promise.all(userPromises);
 
-    await User.create({
+    const customUser = await User.create({
       first_name: "Admin",
       last_name: "Miranda",
       photo: faker.image.avatar(), 
@@ -164,7 +142,11 @@ const seedUsers = async () => {
       email: "admin.miranda@example.com",
     });
 
+    userList.push(customUser)
+
     console.info('11 users have been seeded');
+
+    return userList;
   } catch (error) {
     console.error('Error seeding contacts:', error);
     
@@ -252,24 +234,30 @@ const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
   }
 }
 
-const seedData = async() => {
-  await connectDB();
 
-  await Promise.all([
-    seedContacts(),
-    seedUsers()
-  ])
+export const createSeedData = async () => {
+  await seedContacts()
+
+  const userCollection = await seedUsers();
 
   const roomIds = await seedRooms();
 
   await seedBookings(roomIds);
 
-  await disconnectDB();
-
-  process.exit(0);
+  return { userCollection }
 }
 
-seedData();
+export const seedData = async() => {
+  console.log('process.env.NODE_ENV ', process.env.NODE_ENV);
+  await connectDB();
+
+  await createSeedData();
+
+  await disconnectDB();
+}
+
+if (process.env.NODE_ENV !== 'test') 
+  seedData();
 
 
 
