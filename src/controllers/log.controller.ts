@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   
       res.redirect(302, "/");
     } else {
-      const error = new APIError("Invalid credentials", 401, true);
+      const error = new APIError({message: "Invalid credentials", status: 401, safe: true});
   
       next(error);
     } 
@@ -36,7 +36,7 @@ export const logout = (req: Request, res: Response, next: NextFunction) => {
     
     res.redirect(302, "/");
   } else {
-    const error = new APIError("User is not authenticated", 401, true);
+    const error = new APIError({message: "User is not authenticated", status: 401, safe: true});
 
     next(error)
   }

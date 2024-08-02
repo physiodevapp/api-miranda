@@ -1,3 +1,4 @@
+
 export enum UserStatusType {
   Active = "active",
   Inactive = "inactive"

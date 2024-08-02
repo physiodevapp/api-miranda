@@ -4,13 +4,17 @@ import {
   UserJobType,
   UserStatusType,
 } from "../interfaces/User.interface";
-import { emailRegex } from "../utils/validator";
 import bcrypt from "bcrypt";
 import { APIError } from "../utils/APIError";
+import { emailRegex } from "../utils/validator";
 
 const userSchema = new Schema<UserInterface>(
   {
-    first_name: { type: String, required: [true, "First name is required"] },
+    first_name: {
+      type: String,
+      required: [true, "First name is required"],
+      unique: true,
+    },
     last_name: { type: String, required: [true, "Last name is required"] },
     photo: { type: String, required: [true, "A user's photo is required"] },
     start_date: { type: String, required: [true, "Starting date is required"] },
@@ -33,6 +37,7 @@ const userSchema = new Schema<UserInterface>(
     email: {
       type: String,
       required: true,
+      unique: true,
       validate: {
         validator: (email: string) => emailRegex.test(email),
         message: (props) => `${props.value} is not a valid email address!`,
@@ -54,7 +59,7 @@ const userSchema = new Schema<UserInterface>(
   }
 );
 
-userSchema.pre<UserInterface>("save", async function (next) {
+userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
@@ -66,11 +71,11 @@ userSchema.pre<UserInterface>("save", async function (next) {
     if (error instanceof Error) {
       next(error);
     } else {
-      const customError = new APIError(
-        "Error while trying to hash the password",
-        500,
-        false
-      );
+      const customError = new APIError({
+        message: "Error while trying to hash the password",
+        status: 500,
+        safe: false,
+      });
 
       next(customError);
     }
