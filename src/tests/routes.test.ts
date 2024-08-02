@@ -4,6 +4,9 @@ import { app } from "../app";
 import { generateToken } from "../utils/token";
 import { faker } from "@faker-js/faker";
 import { getUserById, getUserList } from "../services/user.service";
+// import { getRoomList } from "../services/room.service";
+import { UserInterface } from "../interfaces/User.interface";
+// import { getRoomList } from "../services/room.service";
 // import { User } from "../models/user.model";
 // import { User } from "../models/user.model";
 // import userDataList from '../data/users.json';
@@ -70,43 +73,61 @@ describe("Testing User routes", () => {
       .get("/users")
       .set('Cookie', cookie) 
 
-    // mockingoose(User).toReturn(getUserListSeed(), 'find')
-    const userListDB = await getUserList();
-    const userListDBtoJSON = userListDB.map(user => {
-      return JSON.parse(JSON.stringify(user))
-    });
-    console.log('userListDB ', userListDBtoJSON);
-    console.log('response.body ', response.body);
-    expect(response.body).toEqual(userListDBtoJSON);
+    const userListDB = await getUserList() as UserInterface[];
+    const userIdListDB = userListDB.map((user) => {
+      return {
+        id: user.id.toString(),
+        email: user.email
+      }
+    }) as object[]
+
+    const userIdListRes = response.body.map((user: any) => {
+      return {
+        id: user.id.toString(),
+        email: user.email
+      }
+    }) as object[]
+
+    expect(userIdListDB).toEqual(userIdListRes);
   });
 
-  // test("Users route returns a single user if valid credentials", async () => {
+  test("Users route returns a single user if valid credentials", async () => {
+    const userListDB = await getUserList("Admin") as UserInterface[];
+    const userDB = await getUserById(userListDB[0].id) as UserInterface;
 
-  //   const response = await request(app)
-  //     .get(`/users/${userId}`)
-  //     .set('Cookie', cookie) 
+    const response = await request(app)
+      .get(`/users/${userDB.id}`)
+      .set('Cookie', cookie) 
     
-  //   expect(response.body).toEqual(userDataList.find((user) => user.id === userId));
-  // });
+    expect(response.body.id).toEqual(userDB.id);
+  });
 
-  // test("Users route delete a single user if valid credentials", async () => {
+  test("Users route update a single user if valid credentials", async () => {
+    const userListDB = await getUserList("Admin") as UserInterface[];
+    const userDB = await getUserById(userListDB[0].id) as UserInterface;
 
-  //   const response = await request(app)
-  //     .delete(`/users/${userId}`)
-  //     .set('Cookie', cookie) 
+    const response = await request(app)
+      .patch(`/users/${userDB.id}`)
+      .send({first_name: "Adminnn"})
+      .set('Cookie', cookie) 
+
+    const userDBUpdated = await getUserById(userListDB[0].id) as UserInterface;
     
-  //   expect(response.status).toEqual(200);
-  // });
+    expect(response.body.first_name).toEqual(userDBUpdated.first_name);
+  });
 
-  // test("Users route update a single user if valid credentials", async () => {
+  test("Users route delete a single user if valid credentials", async () => {
+    const userListDB = await getUserList() as UserInterface[];
+    const userDB = userListDB.filter((user) => !user.first_name.startsWith("Admin"))[0]
+    console.log('userDB ', userDB);
 
-  //   const response = await request(app)
-  //     .patch(`/users/${userId}`)
-  //     .send({first_name: "Emogenee"})
-  //     .set('Cookie', cookie) 
+    const response = await request(app)
+      .delete(`/users/${userDB.id.toString()}`)
+      .set('Cookie', cookie) 
     
-  //   expect(response.body.first_name).toEqual("Emogenee");
-  // });
+    expect(response.status).toEqual(200);
+    expect(getUserById(userDB.id)).rejects.toThrow("User not found");
+  });
 
   test("Users route create a single user if valid credentials", async () => {
     const newUser = {

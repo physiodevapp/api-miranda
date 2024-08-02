@@ -13,12 +13,10 @@ import fs from 'fs';
 import cookieParser from "cookie-parser";
 import { headers } from './middlewares/response.middleware';
 import mongoose from 'mongoose';
-// const loadEnvConfig = require('../loadEnvConfig');
-
-// loadEnvConfig();
+import { connectDB } from './config/db.config';
 
 if (process.env.NODE_ENV !== 'test') 
-  require('./config/db.config');
+  connectDB();
 
 export const app = express();
 
@@ -83,8 +81,7 @@ app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
   }
 
   const errorData: errorData = {
-    message: error.safe ? error.message : "Application error",
-    // errors: {}
+    message: error.safe ? error.message : "Application error"
   }
 
   if (error as APIError && error.errors) {

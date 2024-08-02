@@ -4,9 +4,9 @@ import {
   UserJobType,
   UserStatusType,
 } from "../interfaces/User.interface";
-import { emailRegex } from "../utils/validator";
 import bcrypt from "bcrypt";
 import { APIError } from "../utils/APIError";
+import { emailRegex } from "../utils/validator";
 
 const userSchema = new Schema<UserInterface>(
   {
@@ -40,7 +40,7 @@ const userSchema = new Schema<UserInterface>(
       unique: true,
       validate: {
         validator: (email: string) => emailRegex.test(email),
-        message: (props: { value: any; }) => `${props.value} is not a valid email address!`,
+        message: (props) => `${props.value} is not a valid email address!`,
       },
     },
   },
@@ -59,7 +59,7 @@ const userSchema = new Schema<UserInterface>(
   }
 );
 
-userSchema.pre<UserInterface>("save", async function (next) {
+userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
