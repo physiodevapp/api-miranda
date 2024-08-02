@@ -1,3 +1,5 @@
+import { Document } from "mongoose";
+
 export enum UserStatusType {
   Active = "active",
   Inactive = "inactive"
@@ -9,7 +11,7 @@ export enum UserJobType {
   Room_service = "Room service"
 }
 
-export interface UserInterface {
+export interface UserInterface extends Document {
   [key: string]: any;
   id: string,
   first_name: string,

@@ -4,7 +4,7 @@ import { app } from "../app";
 import { generateToken } from "../utils/token";
 import { faker } from "@faker-js/faker";
 import { getUserById, getUserList } from "../services/user.service";
-import { User } from "../models/user.model";
+// import { User } from "../models/user.model";
 // import { User } from "../models/user.model";
 // import userDataList from '../data/users.json';
 // import bookingsDataList from '../data/bookings.json';
@@ -71,10 +71,13 @@ describe("Testing User routes", () => {
       .set('Cookie', cookie) 
 
     // mockingoose(User).toReturn(getUserListSeed(), 'find')
-    const userListDB = await getUserList().lean()
-    console.log('userListDB ', userListDB);
+    const userListDB = await getUserList();
+    const userListDBtoJSON = userListDB.map(user => {
+      return JSON.parse(JSON.stringify(user))
+    });
+    console.log('userListDB ', userListDBtoJSON);
     console.log('response.body ', response.body);
-    expect(response.body).toEqual(userListDB);
+    expect(response.body).toEqual(userListDBtoJSON);
   });
 
   // test("Users route returns a single user if valid credentials", async () => {

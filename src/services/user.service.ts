@@ -2,6 +2,7 @@ import { UserInterface } from "../interfaces/User.interface";
 import { APIError } from "../utils/APIError";
 import { User } from "../models/user.model";
 import { ObjectId } from "mongodb";
+import { Query } from "mongoose";
 
 export const getUserById = async (
   userId: string
@@ -17,25 +18,34 @@ export const getUserById = async (
   }
 };
 
-export const getUserList = async (
+export const getUserList = (
   searchTerm: string = ""
-): Promise<UserInterface[] | void> => {
-  try {
-    const searchRegex = new RegExp(searchTerm, "i");
-    const userList = await User.find({
-      $or: [
-        { first_name: { $regex: searchRegex } },
-        { last_name: { $regex: searchRegex } },
-      ],
-    });
+): Query<UserInterface[], UserInterface> => {
 
-    if (!userList) throw new APIError({message: "Contacts not found", status: 400, safe: true});
+  const searchRegex = new RegExp(searchTerm, "i");
+  return User.find({
+    $or: [
+      { first_name: { $regex: searchRegex } },
+      { last_name: { $regex: searchRegex } },
+    ],
+  });
 
-    return userList;
-  } catch (error) {
+  // try {
+  //   const searchRegex = new RegExp(searchTerm, "i");
+  //   const userList = await User.find({
+  //     $or: [
+  //       { first_name: { $regex: searchRegex } },
+  //       { last_name: { $regex: searchRegex } },
+  //     ],
+  //   });
+
+  //   if (!userList) throw new APIError({message: "Contacts not found", status: 400, safe: true});
+
+  //   return userList;
+  // } catch (error) {
     
-    throw error;
-  }
+  //   throw error;
+  // }
 };
 
 export const createUser = async (

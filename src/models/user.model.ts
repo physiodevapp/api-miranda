@@ -40,7 +40,7 @@ const userSchema = new Schema<UserInterface>(
       unique: true,
       validate: {
         validator: (email: string) => emailRegex.test(email),
-        message: (props) => `${props.value} is not a valid email address!`,
+        message: (props: { value: any; }) => `${props.value} is not a valid email address!`,
       },
     },
   },
