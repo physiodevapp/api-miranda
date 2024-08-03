@@ -11,7 +11,6 @@ import { getBookingById, getBookingList } from "../services/booking.service";
 import { BookingInterface } from "../interfaces/Booking.interface";
 import { getContactById, getContactList } from "../services/contact.service";
 import { ContactInterface } from "../interfaces/Contact.interface";
-// import contactsDataList from '../data/contacts.json';
  
 
 describe("Testing User routes", () => {
@@ -468,9 +467,6 @@ describe("Testing Contacts routes", () => {
 
 });
 
-/**
-
-
 describe("Testing log process", () => {
 
   test("Log in with valid credentials", async() => {
@@ -498,6 +494,7 @@ describe("Testing log process", () => {
       })
     
     expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Invalid credentials");
   });
 
   test("Log out with valid credentials remove the credentials-related token", async() => {
@@ -523,6 +520,3 @@ describe("Testing log process", () => {
   });
 
 });
-
-
- */
