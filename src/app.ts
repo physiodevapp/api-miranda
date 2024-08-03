@@ -92,9 +92,9 @@ app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
         return errors
       }, {} as {[key: string]: string});
 
-      errorData.errors = errors
+      errorData.errors = errors;
   }
 
-  res.status(error.status || 500).json(errorData)
+  res.status(error.status || 500).json({error: errorData});
 });
 

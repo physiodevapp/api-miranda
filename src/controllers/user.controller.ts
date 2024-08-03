@@ -7,8 +7,7 @@ import { createUser, deleteUser, getUserById, getUserList, updateUser } from '..
 const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const searchTerm =  typeof req.query?.search_term === "string" ? req.query?.search_term : "";
-    console.log(searchTerm)
-    const userList = await getUserList();
+    const userList = await getUserList(searchTerm);
 
     res.status(200).json(userList);      
   } catch (error) {
