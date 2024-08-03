@@ -7,11 +7,10 @@ import { getUserById, getUserList } from "../services/user.service";
 import { UserInterface } from "../interfaces/User.interface";
 import { RoomInterface } from '../interfaces/Room.interface';
 import { getRoomById, getRoomList } from "../services/room.service";
-// import { getRoomList } from "../services/room.service";
-// import userDataList from '../data/users.json';
+import { getBookingById, getBookingList } from "../services/booking.service";
+import { BookingInterface } from "../interfaces/Booking.interface";
 // import bookingsDataList from '../data/bookings.json';
 // import contactsDataList from '../data/contacts.json';
-// import roomsDataList from '../data/rooms.json';
  
 
 describe("Testing User routes", () => {
@@ -78,14 +77,14 @@ describe("Testing User routes", () => {
       }
     }) as object[]
 
-    const userIdListRes = response.body.map((user: any) => {
+    const userIdListRes = response.body.map((user: UserInterface) => {
       return {
         id: user.id.toString(),
         email: user.email
       }
     }) as object[]
 
-    expect(userIdListDB).toEqual(userIdListRes);
+    expect(userIdListRes).toEqual(userIdListDB );
   });
 
   test("Users route returns a single user if valid credentials", async () => {
@@ -296,6 +295,92 @@ describe("Testing Rooms routes", () => {
 
 });
 
+describe("Testing Bookings routes", () => {
+  let payload: { email: string, password: string };
+  let token: string;
+  let cookie: string;
+
+  beforeEach(async () => {
+    payload = {
+      email: "admin.miranda@example.com",
+      password: "0000"
+    }
+
+    token = generateToken(payload);
+
+    cookie = `token=${token}`;
+  });
+
+  test("Bookings route returns status code 200 if valid token", async () => {
+    const response = await request(app)
+      .get("/bookings")
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(200);
+  });
+
+  test("Bookings route returns status code 500 if invalid token", async () => {
+    const response = await request(app)
+      .get("/bookings")
+      .set("Cookie", `${cookie}lj`); 
+    
+    expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Invalid token");
+  });
+
+  test("Bookings route returns status code 401 if invalid credentials", async () => {
+    payload = {
+      email: "admin.miranda@example.co",
+      password: "0000"
+    }
+    token = generateToken(payload);
+
+    cookie = `token=${token}`;
+
+    const response = await request(app)
+      .get("/bookings")
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Protected route");
+  });
+
+  test("Bookings route returns all bookings if valid credentials", async () => {
+    const response = await request(app)
+      .get("/bookings")
+      .set('Cookie', cookie)
+      
+    const bookingListDB = await getBookingList() as BookingInterface[];
+    const bookingIdListDB = bookingListDB.map((booking) => {
+      return {
+        id: booking.id.toString(),
+        first_name: booking.first_name
+      }
+    }) as object[]
+
+    const bookingIdListRes = response.body.map((booking: BookingInterface) => {
+      return {
+        id: booking.id.toString(),
+        first_name: booking.first_name
+      }
+    }) as object[]
+    
+    expect(bookingIdListRes).toEqual(bookingIdListDB);
+  });
+
+  test("Bookings route returns a single booking if valid credentials", async () => {
+    const bookingListDB = await getBookingList() as BookingInterface[];
+    const bookingDB = await getBookingById(bookingListDB[0].id) as BookingInterface;
+
+    const response = await request(app)
+      .get(`/bookings/${bookingDB.id}`)
+      .set('Cookie', cookie) 
+    
+    expect(response.body.id).toEqual(bookingDB.id);
+  });
+
+});
+
 /**
 
 
@@ -352,75 +437,7 @@ describe("Testing log process", () => {
 
 });
 
-describe("Testing Bookings routes", () => {
-  let payload: { email: string, password: string };
-  let token: string;
-  let bookingId: string;
-  let cookie: string[];
 
-  beforeEach(async () => {
-    payload = {
-      email: "admin.miranda@example.com",
-      password: "0000"
-    }
-
-    token = generateToken(payload);
-
-    cookie = [`token=${token}`];
-
-    bookingId = "ba389f14-4c58-46d8-9314-13a479bcfa21";
-  });
-
-  test("Bookings route returns status code 200 if valid token", async () => {
-    const response = await request(app)
-      .get("/bookings")
-      .set('Cookie', cookie) 
-    
-    expect(response.status).toEqual(200);
-  });
-
-  test("Bookings route returns status code 500 if invalid token", async () => {
-    const response = await request(app)
-      .get("/bookings")
-      .set("Cookie", `${cookie}lj`); 
-    
-    expect(response.status).toEqual(500);
-  });
-
-  test("Bookings route returns status code 401 if invalid credentials", async () => {
-    payload = {
-      email: "admin.miranda@example.co",
-      password: "0000"
-    }
-    token = generateToken(payload);
-
-    cookie = [`token=${token}`];
-
-    const response = await request(app)
-      .get("/bookings")
-      .set('Cookie', cookie) 
-    
-    expect(response.status).toEqual(401);
-  });
-
-  test("Bookings route returns all bookings if valid credentials", async () => {
-    const response = await request(app)
-      .get("/bookings")
-      .set('Cookie', cookie) 
-    
-    expect(response.body).toEqual(bookingsDataList);
-  });
-
-  test("Bookings route returns a single booking if valid credentials", async () => {
-
-    const response = await request(app)
-      .get(`/bookings/${bookingId}`)
-      .set('Cookie', cookie) 
-    
-    expect(response.body).toEqual(bookingsDataList.find((booking) => booking.id === bookingId));
-  });
-
-});
 
 describe("Testing Contacts routes", () => {
   let payload: { email: string, password: string };

@@ -17,7 +17,7 @@ export const getBookingById = async (
 };
 
 export const getBookingList = async (
-  searchTerm: string
+  searchTerm: string = ""
 ): Promise<BookingInterface[] | void> => {
   try {
     const searchRegex = new RegExp(searchTerm, "i");
