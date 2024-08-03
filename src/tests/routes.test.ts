@@ -9,7 +9,8 @@ import { RoomInterface } from '../interfaces/Room.interface';
 import { getRoomById, getRoomList } from "../services/room.service";
 import { getBookingById, getBookingList } from "../services/booking.service";
 import { BookingInterface } from "../interfaces/Booking.interface";
-// import bookingsDataList from '../data/bookings.json';
+import { getContactById, getContactList } from "../services/contact.service";
+import { ContactInterface } from "../interfaces/Contact.interface";
 // import contactsDataList from '../data/contacts.json';
  
 
@@ -381,6 +382,92 @@ describe("Testing Bookings routes", () => {
 
 });
 
+describe("Testing Contacts routes", () => {
+  let payload: { email: string, password: string };
+  let token: string;
+  let cookie: string;
+
+  beforeEach(async () => {
+    payload = {
+      email: "admin.miranda@example.com",
+      password: "0000"
+    }
+
+    token = generateToken(payload);
+
+    cookie = `token=${token}`;
+  });
+
+  test("Contacts route returns status code 200 if valid token", async () => {
+    const response = await request(app)
+      .get("/contacts")
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(200);
+  });
+
+  test("Contacts route returns status code 401 if invalid token", async () => {
+    const response = await request(app)
+      .get("/contacts")
+      .set('Cookie', `${cookie}lj`) 
+    
+    expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Invalid token");
+  });
+
+  test("Contacts route returns status code 401 if invalid credentials", async () => {
+    payload = {
+      email: "admin.miranda@example.co",
+      password: "0000"
+    }
+    token = generateToken(payload);
+
+    cookie = `token=${token}`;
+
+    const response = await request(app)
+      .get("/contacts")
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Protected route");
+  });
+
+  test("Contacts route returns all contacts if valid credentials", async () => {
+    const response = await request(app)
+      .get("/contacts")
+      .set('Cookie', cookie) 
+    
+    const contactListDB = await getContactList() as ContactInterface[];
+    const contactIdListDB = contactListDB.map((contact) => {
+      return {
+        id: contact.id.toString(),
+        email: contact.email
+      }
+    }) as object[]
+
+    const contactIdListRes = response.body.map((contact: ContactInterface) => {
+      return {
+        id: contact.id.toString(),
+        email: contact.email
+      }
+    }) as object[]
+
+    expect(contactIdListRes).toEqual(contactIdListDB );
+  });
+
+  test("Contacts route returns a single contact if valid credentials", async () => {
+    const contactListDB = await getContactList() as ContactInterface[];
+    const contactDB = await getContactById(contactListDB[0].id) as ContactInterface;
+
+    const response = await request(app)
+      .get(`/contacts/${contactDB.id}`)
+      .set('Cookie', cookie) 
+    
+      expect(response.body.id).toEqual(contactDB.id);
+  });
+
+});
+
 /**
 
 
@@ -437,76 +524,5 @@ describe("Testing log process", () => {
 
 });
 
-
-
-describe("Testing Contacts routes", () => {
-  let payload: { email: string, password: string };
-  let token: string;
-  let contactId: string;
-  let cookie: string[];
-
-  beforeEach(async () => {
-    payload = {
-      email: "admin.miranda@example.com",
-      password: "0000"
-    }
-
-    token = generateToken(payload);
-
-    cookie = [`token=${token}`];
-
-    contactId = "ba389f14-4c58-46d8-9314-13a479bcfa21";
-  });
-
-  test("Contacts route returns status code 200 if valid token", async () => {
-    const response = await request(app)
-      .get("/contacts")
-      .set('Cookie', cookie) 
-    
-    expect(response.status).toEqual(200);
-  });
-
-  test("Contacts route returns status code 500 if invalid token", async () => {
-    const response = await request(app)
-      .get("/contacts")
-      .set("authorization", `Bearer ${token}lj`); 
-    
-    expect(response.status).toEqual(500);
-  });
-
-  test("Contacts route returns status code 401 if invalid credentials", async () => {
-    payload = {
-      email: "admin.miranda@example.co",
-      password: "0000"
-    }
-    token = generateToken(payload);
-
-    cookie = [`token=${token}`];
-
-    const response = await request(app)
-      .get("/contacts")
-      .set('Cookie', cookie) 
-    
-    expect(response.status).toEqual(401);
-  });
-
-  test("Contacts route returns all contacts if valid credentials", async () => {
-    const response = await request(app)
-      .get("/contacts")
-      .set('Cookie', cookie) 
-    
-    expect(response.body).toEqual(contactsDataList);
-  });
-
-  test("Contacts route returns a single contact if valid credentials", async () => {
-
-    const response = await request(app)
-      .get(`/contacts/${contactId}`)
-      .set('Cookie', cookie) 
-    
-    expect(response.body).toEqual(contactsDataList.find((contact) => contact.id === contactId));
-  });
-
-});
 
  */
