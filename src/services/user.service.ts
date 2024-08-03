@@ -2,7 +2,6 @@ import { UserInterface } from "../interfaces/User.interface";
 import { APIError } from "../utils/APIError";
 import { User } from "../models/user.model";
 import { ObjectId } from "mongodb";
-// import { Query } from "mongoose";
 
 export const getUserById = async (
   userId: string
@@ -29,7 +28,7 @@ export const getUserList = async (searchTerm: string = ""): Promise<UserInterfac
       ],
     });
 
-    if (!userList) throw new APIError({message: "Contacts not found", status: 400, safe: true});
+    if (!userList) throw new APIError({message: "Users not found", status: 404, safe: true});
 
     return userList;
   } catch (error) {

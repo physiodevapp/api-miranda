@@ -11,7 +11,7 @@ export const getRoomById = async (
 ): Promise<RoomInterface | void> => {
   try {
     const room = await Room.findById(roomId);
-    if (!room) throw new APIError({message: "Room not found", status: 400, safe: true});
+    if (!room) throw new APIError({message: "Room not found", status: 404, safe: true});
 
     return room;
   } catch (error) {
@@ -63,7 +63,7 @@ export const updateRoom = async (
   try {
     const updateRoom = await Room.findById(roomId);
 
-    if (!updateRoom) throw new APIError({message: "User not found", status: 404, safe: true});
+    if (!updateRoom) throw new APIError({message: "Room not found", status: 404, safe: true});
 
     Object.assign(updateRoom, roomData);
 

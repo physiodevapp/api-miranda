@@ -4,18 +4,14 @@ import { app } from "../app";
 import { generateToken } from "../utils/token";
 import { faker } from "@faker-js/faker";
 import { getUserById, getUserList } from "../services/user.service";
-// import { getRoomList } from "../services/room.service";
 import { UserInterface } from "../interfaces/User.interface";
+import { RoomInterface } from '../interfaces/Room.interface';
+import { getRoomById, getRoomList } from "../services/room.service";
 // import { getRoomList } from "../services/room.service";
-// import { User } from "../models/user.model";
-// import { User } from "../models/user.model";
 // import userDataList from '../data/users.json';
 // import bookingsDataList from '../data/bookings.json';
 // import contactsDataList from '../data/contacts.json';
 // import roomsDataList from '../data/rooms.json';
-// import { User } from "../models/user.model";
-// import mockingoose from "mockingoose";
-// const { getUserListSeed } = require('../../sharedState.js');
  
 
 describe("Testing User routes", () => {
@@ -24,7 +20,6 @@ describe("Testing User routes", () => {
   let cookie: string;
 
   beforeEach(async () => {
-    // mockingoose.resetAll();
 
     payload = {
       email: "admin.miranda@example.com",
@@ -50,23 +45,25 @@ describe("Testing User routes", () => {
       .set("Cookie", `${cookie}lj`); 
     
     expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Invalid token");
   });
 
-  // test("Users route returns status code 401 if invalid credentials", async () => {
-  //   payload = {
-  //     email: "admin.miranda@example.co",
-  //     password: "0000"
-  //   }
-  //   token = generateToken(payload);
+  test("Users route returns status code 401 if invalid credentials", async () => {
+    payload = {
+      email: "admin.miranda@example.co",
+      password: "0000"
+    }
+    token = generateToken(payload);
 
-  //   cookie = [`token=${token}`];
+    cookie = `token=${token}`;
 
-  //   const response = await request(app)
-  //     .get("/users")
-  //     .set('Cookie', cookie) 
-    
-  //   expect(response.status).toEqual(401);
-  // });
+    const response = await request(app)
+      .get("/users")
+      .set('Cookie', cookie) 
+
+    expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Protected route");
+  });
 
   test("Users route returns all users if valid credentials", async () => {
     const response = await request(app)
@@ -119,10 +116,9 @@ describe("Testing User routes", () => {
   test("Users route delete a single user if valid credentials", async () => {
     const userListDB = await getUserList() as UserInterface[];
     const userDB = userListDB.filter((user) => !user.first_name.startsWith("Admin"))[0]
-    console.log('userDB ', userDB);
 
     const response = await request(app)
-      .delete(`/users/${userDB.id.toString()}`)
+      .delete(`/users/${userDB.id}`)
       .set('Cookie', cookie) 
     
     expect(response.status).toEqual(200);
@@ -155,8 +151,6 @@ describe("Testing User routes", () => {
 
 });
 
-/**
-
 describe("Testing public routes", () => {
   test('Route "/" returns status code 200', async () => {
     const response = await request(app).get("/");
@@ -164,6 +158,146 @@ describe("Testing public routes", () => {
     expect(response.status).toEqual(200);
   });
 })
+
+describe("Testing Rooms routes", () => {
+  let payload: { email: string, password: string };
+  let token: string;
+  let cookie: string;
+
+  beforeEach(async () => {
+    payload = {
+      email: "admin.miranda@example.com",
+      password: "0000"
+    }
+
+    token = generateToken(payload);
+
+    cookie = `token=${token}`;
+  });
+
+  test("Rooms route returns status code 200 if valid token", async () => {
+    const response = await request(app)
+      .get("/rooms")
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(200);
+  });
+
+  test("Rooms route returns status code 401 if invalid token", async () => {
+    const response = await request(app)
+      .get("/rooms")
+      .set("Cookie", `${cookie}lj`); 
+    
+    expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Invalid token");
+  });
+
+  test("Rooms route returns status code 401 if invalid credentials", async () => {
+    payload = {
+      email: "admin.miranda@example.co",
+      password: "0000"
+    }
+    token = generateToken(payload);
+
+    cookie = `token=${token}`;
+
+    const response = await request(app)
+      .get("/rooms")
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(401);
+    expect(response.body.error.message).toEqual("Protected route");
+  });
+
+  test("Rooms route returns all rooms if valid credentials", async () => {
+    const response = await request(app)
+      .get("/rooms")
+      .set('Cookie', cookie) 
+    
+    const roomListDB = await getRoomList() as RoomInterface[];
+    const roomIdListDB = roomListDB.map((room) => {
+      return {
+        id: room.id.toString(),
+        number: room.number
+      }
+    }) as object[]
+
+    const roomIdListRes = response.body.map((room: any) => {
+      return {
+        id: room.id.toString(),
+        number: room.number
+      }
+    }) as object[]
+
+    expect(roomIdListDB).toEqual(roomIdListRes);
+  });
+
+  test("Rooms route returns a single room if valid credentials", async () => {
+    const roomListDB = await getRoomList() as RoomInterface[];
+    const roomDB = await getRoomById(roomListDB[0].id) as RoomInterface;
+
+    const response = await request(app)
+      .get(`/rooms/${roomDB.id}`)
+      .set('Cookie', cookie) 
+    
+    expect(response.body.id).toEqual(roomDB.id);
+  });
+
+  test("Rooms route update a single room if valid credentials", async () => {
+    const roomListDB = await getRoomList() as RoomInterface[];
+    const roomDB = await getRoomById(roomListDB[0].id) as RoomInterface;
+
+    const response = await request(app)
+      .patch(`/rooms/${roomDB.id}`)
+      .send({price_night: 450})
+      .set('Cookie', cookie) 
+
+    const roomDBUpdated = await getRoomById(roomListDB[0].id) as RoomInterface;
+    
+    expect(response.body.price_night).toEqual(roomDBUpdated.price_night);
+  });
+
+  test("Rooms route delete a single room if valid credentials", async () => {
+    const roomListDB = await getRoomList() as RoomInterface[];
+    const roomDB = await getRoomById(roomListDB[0].id) as RoomInterface;
+
+    const response = await request(app)
+      .delete(`/rooms/${roomDB.id}`)
+      .set('Cookie', cookie) 
+    
+    expect(response.status).toEqual(200);
+    expect(getRoomById(roomDB.id)).rejects.toThrow("Room not found");
+  });
+
+  test("Rooms route create a single room if valid credentials", async () => {
+    const newRoom = {
+      number: 0,
+      description: faker.lorem.sentences(2),
+      facilities: ["Air conditioner", "Breakfast"],
+      name: faker.commerce.productName(),
+      cancellation_policy: "Free cancellation up to 24 hours before check-in.",
+      has_offer: faker.datatype.boolean(),
+      type: "Double Bed",
+      price_night: 150,
+      discount: faker.number.int({ min: 0, max: 50 }),
+      status: "available",
+      photos: [faker.image.url(), faker.image.url()]
+    }
+
+    const response = await request(app)
+      .post(`/rooms`)
+      .send(newRoom)
+      .set('Cookie', cookie) 
+
+    const newRoomDB = await getRoomById(response.body.id)
+    
+    expect(response.body.id).toEqual(newRoomDB!.id);
+  });
+
+});
+
+/**
+
 
 describe("Testing log process", () => {
 
@@ -214,118 +348,6 @@ describe("Testing log process", () => {
     expect(cookies).toBeDefined();
     expect(clearedTokenCookie).toContain('token=;');
     expect(response.status).toEqual(302)
-  });
-
-});
-
-describe("Testing Rooms routes", () => {
-  let payload: { email: string, password: string };
-  let token: string;
-  let roomId: string;
-  let cookie: string[];
-
-  beforeEach(async () => {
-    payload = {
-      email: "admin.miranda@example.com",
-      password: "0000"
-    }
-
-    token = generateToken(payload);
-
-    cookie = [`token=${token}`];
-
-    roomId = "b8eed84f-771e-4702-844d-58c1862914f0";
-  });
-
-  test("Rooms route returns status code 200 if valid token", async () => {
-    const response = await request(app)
-      .get("/rooms")
-      .set('Cookie', cookie) 
-    
-    expect(response.status).toEqual(200);
-  });
-
-  test("Rooms route returns status code 500 if invalid token", async () => {
-    const response = await request(app)
-      .get("/rooms")
-      .set("Cookie", `${cookie}lj`); 
-    
-    expect(response.status).toEqual(500);
-  });
-
-  test("Rooms route returns status code 401 if invalid credentials", async () => {
-    payload = {
-      email: "admin.miranda@example.co",
-      password: "0000"
-    }
-    token = generateToken(payload);
-
-    cookie = [`token=${token}`];
-
-    const response = await request(app)
-      .get("/rooms")
-      .set('Cookie', cookie) 
-    
-    expect(response.status).toEqual(401);
-  });
-
-  test("Rooms route returns all rooms if valid credentials", async () => {
-    const response = await request(app)
-      .get("/rooms")
-      .set('Cookie', cookie) 
-    
-    expect(response.body).toEqual(roomsDataList);
-  });
-
-  test("Rooms route returns a single room if valid credentials", async () => {
-
-    const response = await request(app)
-      .get(`/rooms/${roomId}`)
-      .set('Cookie', cookie) 
-    
-    expect(response.body).toEqual(roomsDataList.find((room) => room.id === roomId));
-  });
-
-  test("Rooms route delete a single room if valid credentials", async () => {
-
-    const response = await request(app)
-      .delete(`/rooms/${roomId}`)
-      .set('Cookie', cookie) 
-    
-    expect(response.status).toEqual(200);
-  });
-
-  test("Rooms route update a single room if valid credentials", async () => {
-
-    const response = await request(app)
-      .patch(`/rooms/${roomId}`)
-      .send({price_night: 450})
-      .set('Cookie', cookie) 
-    
-    expect(response.body.price_night).toEqual(450);
-  });
-
-  test("Rooms route create a single room if valid credentials", async () => {
-    const newRoom = {
-      "id": "b8eed84f-771e-4702-844d-58c1862914p2",
-      "first_name": "Gilberto",
-      "last_name": "Santa Rosa",
-      "photo": "http://dummyimage.com/69x68.png/cc0000/ffffff",
-      "start_date": "1698822608000",
-      "job_description": "Curabitur in libero ut massa volutpat convallis. Morbi odio odio, elementum eu, interdum eu, tincidunt in, leo. Maecenas pulvinar lobortis est.\n\nPhasellus sit amet erat. Nulla tempus. Vivamus in felis eu sapien cursus vestibulum.",
-      "telephone": "+52 744 533 8760",
-      "status": "active",
-      "job": "Reservation desk",
-      "password": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
-      "email": "edu.gamboa.rodriguez@gmail.com"
-    }
-
-    const response = await request(app)
-      .post(`/rooms`)
-      .send(newRoom)
-      .set('Cookie', cookie) 
-    
-    expect(response.body.id).toEqual(newRoom.id);
   });
 
 });
