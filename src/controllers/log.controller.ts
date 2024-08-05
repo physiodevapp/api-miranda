@@ -21,7 +21,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     
       res.cookie('token', token, { httpOnly: true });
   
-      res.redirect(302, "/");
+      res.redirect(302, `${res.locals.basePath}/`);
     } else {
       const error = new APIError({message: "Invalid credentials", status: 401, safe: true});
   
@@ -34,7 +34,7 @@ export const logout = (req: Request, res: Response, next: NextFunction) => {
   if (req.user) {
     res.clearCookie('token');
     
-    res.redirect(302, "/");
+    res.redirect(302, `${res.locals.basePath}/`);
   } else {
     const error = new APIError({message: "User is not authenticated", status: 401, safe: true});
 

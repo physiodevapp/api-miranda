@@ -12,9 +12,11 @@ package:
 provider:
   name: aws
   region: eu-west-3
+  stage: ${opt:stage, 'dev'}  # Default to 'dev' stage if not specified
   environment:
     TOKEN_SECRET: ${file(./src/.env.json):SECRET_KEY}
     MONGO_URL: ${file(./src/.env.json):MONGO_DB_URI}
+    STAGE: ${opt:stage, 'dev'}
   runtime: nodejs20.x
 functions:
   app:
