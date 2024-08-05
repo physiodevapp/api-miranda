@@ -1,0 +1,32 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: physiodev
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: api-miranda
+service: miranda-backend
+package:
+  patterns:
+    - "!./**"
+    - "package.json"
+    - "node_modules/**"
+    - "dist/**"
+provider:
+  name: aws
+  region: eu-west-3
+  stage: ${opt:stage, 'dev'}  # Default to 'dev' stage if not specified
+  environment:
+    TOKEN_SECRET: ${file(./src/.env.json):SECRET_KEY}
+    MONGO_URL: ${file(./src/.env.json):MONGO_DB_URI}
+    STAGE: ${opt:stage, 'dev'}
+  runtime: nodejs20.x
+functions:
+  app:
+    handler: dist/lambda.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true

@@ -6,5 +6,6 @@ module.exports = {
   "setupFilesAfterEnv": ["./jest.setup.cjs"],
   "setupFiles": [
     './jest.env.cjs'
-  ]
+  ],
+  "testMatch": ["**/src/**/*.test.ts"]
 }

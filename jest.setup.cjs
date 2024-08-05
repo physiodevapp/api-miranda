@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { seedData } = require('./src/seed/seed');
 const { connectDB, disconnectDB } = require('./src/config/db.config');
-const loadEnvConfig = require('./loadEnvConfig');
+const loadEnvConfig = require('./src/config/loadEnv.config');
 
 loadEnvConfig();
 
