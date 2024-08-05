@@ -10,7 +10,6 @@
     "build": "rimraf dist && tsc && npm run build:css && npm run copy:assets && copyfiles -u 1 \"src/views/**/*.mustache\" dist",
     "build:css": "sass src/public/styles:dist/public/styles",
     "copy:assets": "copyfiles -u 2 \"src/public/images/**/*\" dist/public",
-    "postbuild": "copyfiles -u 1 src/.env* dist",
     "deploy": "npm run build && serverless deploy"
   },
   "author": "",

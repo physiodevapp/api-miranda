@@ -13,7 +13,6 @@ const loadEnvConfig = () => {
       process.env[key] = envConfig[key];
     });
 
-    // Load additional variables from .env if needed
     dotenv.config();
 
   } catch (error) {
