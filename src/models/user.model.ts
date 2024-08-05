@@ -4,7 +4,7 @@ import {
   UserJobType,
   UserStatusType,
 } from "../interfaces/User.interface";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 import { APIError } from "../utils/APIError";
 import { emailRegex } from "../utils/validator";
 
@@ -63,8 +63,8 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    const salt = await bcryptjs.genSalt(10);
+    this.password = await bcryptjs.hash(this.password, salt);
 
     next();
   } catch (error) {
@@ -85,7 +85,7 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.checkPassword = function (
   password: string
 ): Promise<Boolean> {
-  return bcrypt.compare(password, this.password);
+  return bcryptjs.compare(password, this.password);
 };
 
 export const User = model<UserInterface>("User", userSchema);

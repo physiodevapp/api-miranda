@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 
-const loadEnvConfig = require('../../loadEnvConfig');
+const loadEnvConfig = require('../config/loadEnv.config');
 
 loadEnvConfig();
 
 export const connectDB = async () => {
+  console.log('MONGO_DB_URI ', process.env.MONGO_DB_URI ? 'true' : 'false');
   const MONGO_DB_URI = process.env.MONGO_DB_URI as string;
 
   try {
