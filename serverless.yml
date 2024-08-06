@@ -15,8 +15,9 @@ provider:
   stage: ${opt:stage, 'dev'}  # Default to 'dev' stage if not specified
   environment:
     NODE_ENV: production
-    SECRET_KEY: ${file(./src/.env.json):SECRET_KEY}
-    MONGO_DB_URI: ${file(./src/.env.json):MONGO_DB_URI}
+    SECRET_KEY: ${file(.env.json):SECRET_KEY}
+    MONGO_DB_URI: ${file(.env.json):MONGO_DB_URI}
+    IMAGE_BASE_URL: ${file(.env.json):IMAGE_BASE_URL}
     STAGE: ${opt:stage, 'dev'}
   runtime: nodejs20.x
 functions:
