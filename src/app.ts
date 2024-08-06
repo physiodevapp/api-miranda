@@ -30,16 +30,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const stage = process.env.STAGE;
-const basePath = stage ? `/${stage}` : '';
-console.log('`${basePath}/` ', `${basePath}/`);
 
 app.use(express.static(`${__dirname}/public`))
 
 app.engine('mustache', (filePath, options, callback) => {
   fs.readFile(filePath, (err, content) => {
     if (err) return callback(err);
-
+    
     const rendered = mustache.render(content.toString(), options);
     
     return callback(null, rendered);
@@ -48,8 +45,13 @@ app.engine('mustache', (filePath, options, callback) => {
 app.set('view engine', 'mustache');
 app.set('views', `${__dirname}/views`);
 
+const stage = process.env.STAGE;
+const basePath = stage ? `/${stage}` : '';
+const baseStaticFilesPath = stage ? process.env.IMAGE_BASE_URL : '';
 app.use((_req: Request, res: Response, next: NextFunction) => {
   res.locals.basePath = basePath;
+  res.locals.baseStaticFilesPath = baseStaticFilesPath;
+
   next();
 });
 
