@@ -17,7 +17,7 @@ provider:
     NODE_ENV: production
     SECRET_KEY: ${file(.env.json):SECRET_KEY}
     MONGO_DB_URI: ${file(.env.json):MONGO_DB_URI}
-    IMAGE_BASE_URL: ${file(.env.json):IMAGE_BASE_URL}
+    STATIC_FILES_BASE_URL: ${file(.env.json):STATIC_FILES_BASE_URL}
     STAGE: ${opt:stage, 'dev'}
   runtime: nodejs20.x
 functions:

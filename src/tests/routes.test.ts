@@ -61,7 +61,7 @@ describe("Testing User routes", () => {
       .set('Cookie', cookie) 
 
     expect(response.status).toEqual(401);
-    expect(response.body.error.message).toEqual("Protected route");
+    expect(response.body.error.message).toEqual("Private route");
   });
 
   test("Users route returns all users if valid credentials", async () => {
@@ -205,7 +205,7 @@ describe("Testing Rooms routes", () => {
       .set('Cookie', cookie) 
     
     expect(response.status).toEqual(401);
-    expect(response.body.error.message).toEqual("Protected route");
+    expect(response.body.error.message).toEqual("Private route");
   });
 
   test("Rooms route returns all rooms if valid credentials", async () => {
@@ -342,7 +342,7 @@ describe("Testing Bookings routes", () => {
       .set('Cookie', cookie) 
     
     expect(response.status).toEqual(401);
-    expect(response.body.error.message).toEqual("Protected route");
+    expect(response.body.error.message).toEqual("Private route");
   });
 
   test("Bookings route returns all bookings if valid credentials", async () => {
@@ -428,7 +428,7 @@ describe("Testing Contacts routes", () => {
       .set('Cookie', cookie) 
     
     expect(response.status).toEqual(401);
-    expect(response.body.error.message).toEqual("Protected route");
+    expect(response.body.error.message).toEqual("Private route");
   });
 
   test("Contacts route returns all contacts if valid credentials", async () => {

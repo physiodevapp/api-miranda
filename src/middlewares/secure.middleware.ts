@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { APIError } from "../utils/APIError";
 import { verifyToken } from "../utils/token";
-import { User } from "../models/user.model";
+import { User } from "../models/user.model"; 
 
 export const checkRequestAuth = (async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -31,7 +31,7 @@ export const isAuth = (req: Request, _res: Response, next: NextFunction) => {
   if (req.user) {
     next()
   } else {
-    const error = new APIError({message: "Protected route", status: 401, safe: true});
+    const error = new APIError({message: "Private route", status: 401, safe: true});
 
     next(error);
   }
