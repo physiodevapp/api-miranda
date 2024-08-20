@@ -19,7 +19,13 @@ import cors from 'cors';
 
 export const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true,
+  optionsSuccessStatus: 200
+}
+
+app.use(cors(corsOptions));
 
 if (process.env.NODE_ENV !== 'test') 
   connectDB();
@@ -29,8 +35,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-
+ 
 app.use(express.static(`${__dirname}/public`))
 
 app.engine('mustache', (filePath, options, callback) => {
@@ -44,10 +49,10 @@ app.engine('mustache', (filePath, options, callback) => {
 });
 app.set('view engine', 'mustache');
 app.set('views', `${__dirname}/views`);
-
+ 
 const stage = process.env.STAGE;
 const basePath = stage ? `/${stage}` : '';
-const baseStaticFilesPath = stage ? process.env.IMAGE_BASE_URL : '';
+const baseStaticFilesPath = stage ? process.env.STATIC_FILES_BASE_URL : '';
 app.use((_req: Request, res: Response, next: NextFunction) => {
   res.locals.basePath = basePath;
   res.locals.baseStaticFilesPath = baseStaticFilesPath;

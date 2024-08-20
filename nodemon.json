@@ -2,5 +2,5 @@
   "watch": ["."],
   "ext": "ts,json,css,mustache",
   "ignore": [],
-  "exec": "ts-node ./src/server.ts"
+  "exec": "set NODE_ENV=dev&& ts-node ./src/server.ts"
 }
