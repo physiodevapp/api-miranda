@@ -3,7 +3,6 @@ import {
   BookingInterface,
   BookingStatusType,
 } from "../interfaces/Booking.interface";
-import { RoomType } from "../interfaces/Room.interface";
 
 const bookingSchema = new Schema<BookingInterface>(
   {
@@ -12,11 +11,6 @@ const bookingSchema = new Schema<BookingInterface>(
     order_date: { type: String, required: [true, "Order date is required"] },
     check_in: { type: String, required: true },
     check_out: { type: String, required: true },
-    room_type: {
-      type: String,
-      enum: Object.values(RoomType),
-      required: [true, "Room type is required"],
-    },
     room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true },
     status: { type: String, enum: Object.values(BookingStatusType), required: true },
     special_request: { type: String },

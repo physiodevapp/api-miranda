@@ -82,25 +82,10 @@ body {
   color: white;
   background-color: #135846;
 }
-.section__article__authorization button.authorized {
-  color: #E23428;
-  background-color: #FFEDEC;
-}
-.section__article__authorization button.authorized:hover {
-  color: white;
-  background-color: #E23428;
-}
 .section__article__endpoints {
   list-style-type: none;
   font-size: 1.2rem;
   color: #ababab;
-}
-.section__article__endpoints.authorized {
-  color: #135846;
-}
-.section__article__endpoints.authorized a:hover {
-  color: white;
-  background-color: #135846;
 }
 .section__article__endpoints li {
   padding: 0.4em;

@@ -212,7 +212,6 @@ const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
         order_date: new Date().toISOString().split('T')[0],
         check_in: checkInDate,
         check_out: checkOutDate,
-        room_type: getRandomRoomType(),
         room: roomId,
         status: determineBookingStatus(checkInDate, checkOutDate),
         special_request: faker.lorem.sentence()

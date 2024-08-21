@@ -3,12 +3,16 @@ import { APIError } from "../utils/APIError";
 import { verifyToken } from "../utils/token";
 import { User } from "../models/user.model"; 
 
-export const checkRequestAuth = (async (req: Request, res: Response, next: NextFunction) => {
+export const checkRequestAuth = (async (req: Request, _res: Response, next: NextFunction) => {
   try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
+    let token;
 
-    if (!token)
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } else {
       return next();
+    }
 
     const decoded = verifyToken(token);
 
@@ -18,7 +22,6 @@ export const checkRequestAuth = (async (req: Request, res: Response, next: NextF
       return next(new APIError({message: "Invalid schema of the token", status: 401, safe: false}));
     }
   } catch (error) {
-    res.clearCookie('token');
 
     return next(new APIError({message: "Invalid token", status: 401, safe: true}));
   }
@@ -29,7 +32,7 @@ export const checkRequestAuth = (async (req: Request, res: Response, next: NextF
 
 export const isAuth = (req: Request, _res: Response, next: NextFunction) => {
   if (req.user) {
-    next()
+    next();
   } else {
     const error = new APIError({message: "Private route", status: 401, safe: true});
 

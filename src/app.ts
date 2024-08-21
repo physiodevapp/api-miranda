@@ -6,11 +6,10 @@ import { router as userRoutes } from './controllers/user.controller';
 import { router as roomRoutes } from './controllers/room.controller';
 import { router as contactRoutes } from './controllers/contact.controller';
 import { router as bookingRoutes } from './controllers/booking.controller';
-import { login, logout } from './controllers/log.controller';
+import { login } from './controllers/log.controller';
 import { APIError } from './utils/APIError';
 import mustache from "mustache";
 import fs from 'fs';
-import cookieParser from "cookie-parser";
 import { headers } from './middlewares/response.middleware';
 import { connectDB } from './config/db.config';
 import { handleError } from './controllers/error.controller';
@@ -21,10 +20,8 @@ export const app = express();
 
 const corsOptions = {
   origin: 'http://localhost:5173',
-  credentials: true,
   optionsSuccessStatus: 200
-}
-
+};
 app.use(cors(corsOptions));
 
 if (process.env.NODE_ENV !== 'test') 
@@ -34,7 +31,6 @@ app.use(logger("dev"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
  
 app.use(express.static(`${__dirname}/public`))
 
@@ -63,7 +59,6 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 app.use(checkRequestAuth);
 
 app.post(`/login`, headers, login);
-app.post(`/logout`, headers, logout);
 app.get(`/`, (req: Request, res: Response) => res.render('index', {user: req.user}));
 app.use(`/users`, isAuth, userRoutes);
 app.use(`/rooms`, isAuth, roomRoutes);
