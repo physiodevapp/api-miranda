@@ -29,7 +29,7 @@ export const getUserList = async (searchTerm: string = ""): Promise<UserInterfac
     });
 
     if (!userList) throw new APIError({message: "Users not found", status: 404, safe: true});
-
+    
     return userList;
   } catch (error) {
     

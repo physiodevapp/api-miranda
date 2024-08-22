@@ -16,7 +16,7 @@ export interface UserInterface {
   first_name: string,
   last_name: string,
   photo: string,
-  start_date: string,
+  start_date: Date,
   job_description: string,
   telephone: string,
   status: UserStatusType,
