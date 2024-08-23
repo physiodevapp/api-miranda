@@ -9,7 +9,7 @@ export const login = async (
   next: NextFunction
 ) => {
   const { email, password } = req.body;
-  console.log(email, password);
+  console.log('req.body ', req.body)
 
   const user = await User.findOne({ email });
 
@@ -22,7 +22,9 @@ export const login = async (
 
       const token = generateToken(payload);
 
-      res.cookie("token", token, { httpOnly: true });
+      res.setHeader('Authorization', `Bearer ${token}`);
+      res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+
       res.status(200).json({
         id: user.id,
         first_name: user.first_name,
@@ -30,7 +32,7 @@ export const login = async (
         photo: user.photo,
         email,
       });
-      //res.redirect(302, `${res.locals.basePath}/`);
+
     } else {
       const error = new APIError({
         message: "Invalid credentials",
@@ -40,21 +42,5 @@ export const login = async (
 
       next(error);
     }
-  }
-};
-
-export const logout = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user) {
-    res.clearCookie("token");
-
-    res.redirect(302, `${res.locals.basePath}/`);
-  } else {
-    const error = new APIError({
-      message: "User is not authenticated",
-      status: 401,
-      safe: true,
-    });
-
-    next(error);
   }
 };

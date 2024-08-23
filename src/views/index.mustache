@@ -14,22 +14,16 @@
     <section class="section">
       <article class="section__article">
         <h1 class="section__article__title"><img src="{{baseStaticFilesPath}}/images/dashboard-logo.png"/>Miranda API</h1>      
-        <form method="POST" action="{{#user}}{{basePath}}/logout{{/user}}{{^user}}{{basePath}}/login{{/user}}" class="section__article__authorization">
-          <input name="email" value="{{#user}}{{user.email}}{{/user}}" {{#user}}disabled{{/user}} placeholder="Try: admin.miranda@example.com"/>
-          <input name="password" type="password" value="{{#user}}{{user.password}}{{/user}}" {{#user}}disabled{{/user}} placeholder="Try: 0000"/>
-          <button type="submit" class="{{#user}}authorized{{/user}}">
-          {{#user}}
-            <span>Unauthorize private routes</span>
-          {{/user}}
-          {{^user}}
-            <span>Authorize private routes</span>
-          {{/user}}
+        <form method="POST" action="{{basePath}}/login" class="section__article__authorization">
+          <input name="email" value="{{#user}}{{user.email}}{{/user}}" placeholder="Try: admin.miranda@example.com"/>
+          <input name="password" type="password" value="{{#user}}{{user.password}}{{/user}}" placeholder="Try: 0000"/>
+          <button type="submit">
+            <span>Check log in process</span>
           </button>
         </form>  
         <h4 class="section__article__subtitle">Private routes 
-        {{#user}}<i class="fa fa-check-square-o fa-fw"></i>{{/user}}
         </h4>
-        <ul class="section__article__endpoints {{#user}}authorized{{/user}}">
+        <ul class="section__article__endpoints">
           <li> <i class="fa fa-users fa-fw"></i> <a href="{{basePath}}/users">Users</a> </li> 
           <li> <i class="fa fa-address-book-o fa-fw"></i> <a href="{{basePath}}/bookings">Bookings</a> </li>
           <li> <i class="fa fa-key fa-fw"></i> <a href="{{basePath}}/rooms">Rooms</a> </li>

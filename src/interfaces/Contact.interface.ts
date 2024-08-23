@@ -13,7 +13,7 @@ export interface ContactInterface {
   phone: string,
   subject: string,
   message: string,
-  datetime: string,
+  datetime: Date,
   createdAt?: Date,
   updatedAt?: Date,
 };

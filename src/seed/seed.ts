@@ -55,12 +55,46 @@ const generatePrice = () => {
   return parseFloat(price.toFixed(2));
 };
 
-const getRandomDate = (start: Date, end: Date) => {
-  const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-  return date.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+// const getRandomDate = (start: Date, end: Date) => {
+//   const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+//   return date.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+// };
+
+const getRandomDate = (start: Date, end: Date): Date => {
+  // Generate a random timestamp between start and end
+  const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+  
+  // Create a new Date object from the random timestamp
+  const randomDate = new Date(randomTimestamp);
+  
+  // Return the Date object (in UTC format internally)
+  return randomDate;
 };
 
-const determineBookingStatus = (checkInDate: string, checkOutDate: string) => {
+const getRandomOrderDate = (checkInDate: Date): Date => {
+  const MIN_DAYS_BEFORE = 7; // Minimum days before check-in
+  const MAX_DAYS_BEFORE = 20; // Maximum days before check-in
+
+  // Ensure the check-in date is in UTC
+  const checkInUTC = new Date(Date.UTC(checkInDate.getUTCFullYear(), checkInDate.getUTCMonth(), checkInDate.getUTCDate()));
+
+  // Calculate the range in milliseconds
+  const minTimeBefore = MIN_DAYS_BEFORE * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+  const maxTimeBefore = MAX_DAYS_BEFORE * 24 * 60 * 60 * 1000; // 20 days in milliseconds
+
+  // Get the time of check-in date in UTC
+  const checkInTime = checkInUTC.getTime();
+
+  // Generate a random number of milliseconds to subtract (within the defined range)
+  const randomTimeBefore = minTimeBefore + Math.random() * (maxTimeBefore - minTimeBefore);
+
+  // Calculate the order date time in UTC
+  const orderDateTime = new Date(checkInTime - randomTimeBefore);
+
+  return orderDateTime;
+};
+
+const determineBookingStatus = (checkInDate: Date, checkOutDate: Date) => {
   const now = new Date();
   const checkIn = new Date(checkInDate);
   const checkOut = new Date(checkOutDate);
@@ -91,7 +125,7 @@ const seedContacts = async () => {
         phone: faker.phone.number(),
         subject: faker.lorem.words(3),
         message: faker.lorem.paragraph(),
-        datetime: faker.date.past().toISOString(),
+        datetime: faker.date.past(),
       })
     });
 
@@ -113,7 +147,7 @@ const seedUsers = async () => {
       return User.create({
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
-        photo: faker.image.avatar(), 
+        photo: faker.image.avatarGitHub(), 
         start_date: faker.date.past({ years: 1 }).toISOString(),
         job_description: faker.lorem.sentence(),
         telephone: faker.phone.number(),
@@ -130,7 +164,7 @@ const seedUsers = async () => {
       first_name: "Admin",
       last_name: "Miranda",
       photo: faker.image.avatar(), 
-      start_date: faker.date.past({ years: 1 }).toISOString(),
+      start_date: faker.date.past({ years: 1 }),//.toISOString(),
       job_description: faker.lorem.sentence(),
       telephone: faker.phone.number(),
       status: getRandomUserStatus(),
@@ -204,15 +238,15 @@ const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
       const DAY_IN_MS = 24*60*60*1000;
 
       const checkInDate = getRandomDate(new Date(now.getTime() - 30*DAY_IN_MS), new Date(now.getTime() + 30*DAY_IN_MS)); 
-      const checkOutDate = new Date(new Date(checkInDate).getTime() + Math.floor(Math.random() * 20) * DAY_IN_MS).toISOString().split('T')[0]; 
+      // const checkOutDate = new Date(new Date(checkInDate).getTime() + Math.floor(Math.random() * 20) * DAY_IN_MS).toISOString().split('T')[0]; 
+      const checkOutDate = new Date(new Date(checkInDate).getTime() + Math.floor(Math.random() * 20) * DAY_IN_MS);
 
       bookings.push({
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
-        order_date: new Date().toISOString().split('T')[0],
+        order_date: getRandomOrderDate(checkInDate),//new Date().toISOString().split('T')[0],
         check_in: checkInDate,
         check_out: checkOutDate,
-        room_type: getRandomRoomType(),
         room: roomId,
         status: determineBookingStatus(checkInDate, checkOutDate),
         special_request: faker.lorem.sentence()

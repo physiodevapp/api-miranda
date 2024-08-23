@@ -88,16 +88,6 @@ body {
           color: white;
           background-color: #135846;
         }
-        
-        &.authorized {
-          color: #E23428;
-          background-color: #FFEDEC;
-
-          &:hover {
-            color: white;
-            background-color: #E23428;
-          }
-        }
       }
     }
 
@@ -105,15 +95,6 @@ body {
       list-style-type: none;
       font-size: 1.2rem;
       color: #ababab;
-
-      &.authorized {        
-        color: #135846;
-        
-        a:hover {
-          color: white;
-          background-color: #135846;
-        }
-      }
 
       li {
         padding: 0.4em;

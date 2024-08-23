@@ -41,7 +41,9 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await deleteUser(req.params.userId);
 
-    res.status(200).json();
+    const userList = await getUserList();
+
+    res.status(200).json(userList);
   } catch (error) {
     next(error)
   }
