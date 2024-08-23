@@ -63,24 +63,23 @@ const userSchema = new Schema<UserInterface>(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  try {
-    const salt = await bcryptjs.genSalt(10);
-    this.password = await bcryptjs.hash(this.password, salt);
-
-    next();
-  } catch (error) {
-    if (error instanceof Error) {
-      return next(error);
-    } else {
-      const customError = new APIError({
-        message: "Error while trying to hash the password",
-        status: 500,
-        safe: false,
-      });
-
-      return next(customError);
+  if (this.isModified("password")) {
+    try {
+      const salt = await bcryptjs.genSalt(10);
+      this.password = await bcryptjs.hash(this.password, salt);
+  
+    } catch (error) {
+      if (error instanceof Error) {
+        return next(error);
+      } else {
+        const customError = new APIError({
+          message: "Error while trying to hash the password",
+          status: 500,
+          safe: false,
+        });
+  
+        return next(customError);
+      }
     }
   }
 
@@ -89,11 +88,13 @@ userSchema.pre("save", async function (next) {
   dateFields.forEach((field) => {
     if (this[field] && typeof this[field] === 'string') {
       const date = new Date(this[field]);
-
+      
       if (!isNaN(date.getTime())) {
         this[field] = date;
+        
       } else {
         const error = new APIError({message: `Invalid date format for ${field}`, status: 400, safe: true});
+
         return next(error);
       }
     }

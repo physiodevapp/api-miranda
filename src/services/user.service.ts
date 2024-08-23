@@ -53,6 +53,7 @@ export const createUser = async (
 export const deleteUser = async (userId: string): Promise<void> => {
   try {
     const objectId = new ObjectId(userId);
+    
     await User.deleteOne({ _id: objectId });
   } catch (error) {
     
