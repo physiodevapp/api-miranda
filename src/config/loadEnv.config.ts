@@ -3,14 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const loadEnvConfig = () => {
-  let env;
-
-  if (process.env.NODE_ENV === 'test')
-    env = '../../.env.test.json'
-  else if (process.env.NODE_ENV === 'dev')
-    env = '../../.env.dev.json'
-  else
-    env = '../../.env.json'
+  const env = process.env.NODE_ENV === 'test' ? '../../.env.test.json' : '../../.env.json';
 
   try {
     const envPath = path.resolve(__dirname, env);

@@ -7,7 +7,6 @@
     "dev": "nodemon",
     "test": "jest",
     "seed": "ts-node src/seed/seed.ts",
-    "mysqlseed": "set NODE_ENV=dev&& ts-node src/seed/seed.ts",
     "build": "rimraf dist && tsc && npm run build:css && copyfiles -u 1 \"src/views/**/*.mustache\" dist",
     "build:css": "sass src/public/styles:dist/public/styles",
     "deploy": "npm run build && serverless deploy"
@@ -46,7 +45,6 @@
     "mongoose": "^8.5.2",
     "morgan": "^1.10.0",
     "mustache": "^4.2.0",
-    "mysql2": "^3.11.0",
     "sass": "^1.77.8"
   }
 }

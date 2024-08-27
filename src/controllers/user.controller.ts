@@ -39,10 +39,11 @@ const detail = async (req: Request, res: Response, next: NextFunction) => {
 
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const deletedUser =  await getUserById(req.params.userId)
     await deleteUser(req.params.userId);
 
-    res.status(200).json(deletedUser);
+    const userList = await getUserList();
+
+    res.status(200).json(userList);
   } catch (error) {
     next(error)
   }
