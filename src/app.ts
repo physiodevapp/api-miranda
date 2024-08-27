@@ -11,6 +11,7 @@ import { APIError } from './utils/APIError';
 import mustache from "mustache";
 import fs from 'fs';
 import { headers } from './middlewares/response.middleware';
+import { connectDB } from './config/db.config';
 import { handleError } from './controllers/error.controller';
 import serverless from 'serverless-http';
 import cors from 'cors';
@@ -22,6 +23,9 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
+
+if (process.env.NODE_ENV !== 'test') 
+  connectDB();
 
 app.use(logger("dev"));
 
