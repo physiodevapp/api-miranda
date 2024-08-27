@@ -2,7 +2,7 @@
 import { ContactStatusType } from "../interfaces/Contact.interface";
 import { faker } from '@faker-js/faker';
 // import { Contact } from "../models/contact.model";
-import { createPool } from "../config/dbMySQL.config";
+import { getPool } from "../config/dbMySQL.config";
 // import { User } from "../models/user.model";
 // import { UserJobType, UserStatusType } from "../interfaces/User.interface";
 // import { Room } from "../models/room.model";
@@ -108,7 +108,7 @@ const getRandomContactStatus = (): ContactStatusType => {
 // };
 
 const seedContacts = async () => {
-  const pool = await createPool();
+  const pool = await getPool();
   const connection = await pool.getConnection();
 
   try {
