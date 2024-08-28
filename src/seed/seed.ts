@@ -2,11 +2,9 @@ import { ContactStatusType } from "../interfaces/Contact.interface";
 import { faker } from '@faker-js/faker';
 import { getPool } from "../config/dbMySQL.config";
 import { UserJobType, UserStatusType } from "../interfaces/User.interface";
-// import { Room } from "../models/room.model";
 import { RoomFacility, RoomStatusType, RoomType } from "../interfaces/Room.interface";
-// import { BookingStatusType } from "../interfaces/Booking.interface";
+import { BookingStatusType } from "../interfaces/Booking.interface";
 // import { Booking } from "../models/booking.model";
-// import { connectDB, disconnectDB } from "../config/db.config";
 import bcryptjs from "bcryptjs";
 import { ResultSetHeader } from 'mysql2';
 
@@ -55,56 +53,56 @@ const generatePrice = () => {
   return parseFloat(price.toFixed(2));
 };
 
-// const getRandomDate = (start: Date, end: Date): Date => {
-//   // Generate a random timestamp between start and end
-//   const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+const getRandomDate = (start: Date, end: Date): Date => {
+  // Generate a random timestamp between start and end
+  const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
   
-//   // Create a new Date object from the random timestamp
-//   const randomDate = new Date(randomTimestamp);
+  // Create a new Date object from the random timestamp
+  const randomDate = new Date(randomTimestamp);
   
-//   // Return the Date object (in UTC format internally)
-//   return randomDate;
-// };
+  // Return the Date object (in UTC format internally)
+  return randomDate;
+};
 
-// const getRandomOrderDate = (checkInDate: Date): Date => {
-//   const MIN_DAYS_BEFORE = 7; // Minimum days before check-in
-//   const MAX_DAYS_BEFORE = 20; // Maximum days before check-in
+const getRandomOrderDate = (checkInDate: Date): Date => {
+  const MIN_DAYS_BEFORE = 7; // Minimum days before check-in
+  const MAX_DAYS_BEFORE = 20; // Maximum days before check-in
 
-//   // Ensure the check-in date is in UTC
-//   const checkInUTC = new Date(Date.UTC(checkInDate.getUTCFullYear(), checkInDate.getUTCMonth(), checkInDate.getUTCDate()));
+  // Ensure the check-in date is in UTC
+  const checkInUTC = new Date(Date.UTC(checkInDate.getUTCFullYear(), checkInDate.getUTCMonth(), checkInDate.getUTCDate()));
 
-//   // Calculate the range in milliseconds
-//   const minTimeBefore = MIN_DAYS_BEFORE * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-//   const maxTimeBefore = MAX_DAYS_BEFORE * 24 * 60 * 60 * 1000; // 20 days in milliseconds
+  // Calculate the range in milliseconds
+  const minTimeBefore = MIN_DAYS_BEFORE * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+  const maxTimeBefore = MAX_DAYS_BEFORE * 24 * 60 * 60 * 1000; // 20 days in milliseconds
 
-//   // Get the time of check-in date in UTC
-//   const checkInTime = checkInUTC.getTime();
+  // Get the time of check-in date in UTC
+  const checkInTime = checkInUTC.getTime();
 
-//   // Generate a random number of milliseconds to subtract (within the defined range)
-//   const randomTimeBefore = minTimeBefore + Math.random() * (maxTimeBefore - minTimeBefore);
+  // Generate a random number of milliseconds to subtract (within the defined range)
+  const randomTimeBefore = minTimeBefore + Math.random() * (maxTimeBefore - minTimeBefore);
 
-//   // Calculate the order date time in UTC
-//   const orderDateTime = new Date(checkInTime - randomTimeBefore);
+  // Calculate the order date time in UTC
+  const orderDateTime = new Date(checkInTime - randomTimeBefore);
 
-//   return orderDateTime;
-// };
+  return orderDateTime;
+};
 
-// const determineBookingStatus = (checkInDate: Date, checkOutDate: Date) => {
-//   const now = new Date();
-//   const checkIn = new Date(checkInDate);
-//   const checkOut = new Date(checkOutDate);
+const determineBookingStatus = (checkInDate: Date, checkOutDate: Date) => {
+  const now = new Date();
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
 
-//   if (checkOut < now) {
-//     return BookingStatusType.Check_out;
-//   } else if (checkIn > now) {
-//     return BookingStatusType.Check_in;
-//   } else if (checkIn <= now && now <= checkOut) {
-//     return BookingStatusType.In_progress;
-//   } else {
-//     // Default return value, though this branch should never be reached
-//     return BookingStatusType.Check_in;
-//   }
-// };
+  if (checkOut < now) {
+    return BookingStatusType.Check_out;
+  } else if (checkIn > now) {
+    return BookingStatusType.Check_in;
+  } else if (checkIn <= now && now <= checkOut) {
+    return BookingStatusType.In_progress;
+  } else {
+    // Default return value, though this branch should never be reached
+    return BookingStatusType.Check_in;
+  }
+};
 
 const seedContacts = async () => {
   const pool = await getPool();
@@ -334,7 +332,7 @@ const seedUsers = async () => {
   }
 }
 
-const seedRooms = async () => {
+const seedRooms = async (): Promise<number[]> => {
   const pool = await getPool();
   const connection = await pool.getConnection();
 
@@ -406,6 +404,8 @@ const seedRooms = async () => {
     `;
     await connection.query(createRoomsFacilitiesRelationTable);
 
+    const roomIdList: number[]  = [];
+
     const roomPromises = Array.from({ length: 10 }).map(async (_, index) => {
       const status = getRandomRoomStatusType();
 
@@ -439,6 +439,7 @@ const seedRooms = async () => {
       );
 
       const roomId = result.insertId;
+      roomIdList.push(roomId);
 
       // Insert room facilities into the room_facilities table
       for (const facility of room.facilities) {
@@ -458,7 +459,7 @@ const seedRooms = async () => {
     await Promise.all(roomPromises);
     console.log('10 rooms have been seeded');
 
-    //   return rooms.map(room => room._id); 
+    return roomIdList;
   } catch(error) {
     console.error('Error seeding rooms:', error);
     
@@ -470,64 +471,111 @@ const seedRooms = async () => {
 
 }
 
-// const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
-//   const availableRoomNumbers = new Set(roomIds);
+const seedBookings = async (roomIds: number[]) => {
+  const availableRoomNumbers = new Set(roomIds);
 
-//   try {
-//     await Booking.deleteMany({});
-//     // console.('Booking collection cleared');    
+  const pool = await getPool();
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.query(`DROP TABLE IF EXISTS booking_statuses`);
+
+    // Create the statuses table
+    const createStatusesTableQuery = `
+      CREATE TABLE IF NOT EXISTS booking_statuses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE
+      );
+    `;
+    await connection.query(createStatusesTableQuery);
+    console.log('Statuses table ensured');
+
+    // Insert initial statuses into the statuses table
+    const insertStatusesQuery = `
+      INSERT INTO booking_statuses (name) VALUES ("${BookingStatusType.Check_in}"), ("${BookingStatusType.Check_out}"), ("${BookingStatusType.In_progress}");
+    `;
+    await connection.query(insertStatusesQuery);
+    console.log('Initial statuses have been inserted');
+
+    const createBookingsTableQuery = `
+      CREATE TABLE IF NOT EXISTS bookings (
+        id INT AUTO_INCREMENT,
+        status_id INT,
+        room_id INT,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        order_date DATETIME NOT NULL,
+        check_in DATETIME NOT NULL,
+        check_out DATETIME NOT NULL,
+        special_request VARCHAR(400) NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (status_id) REFERENCES booking_statuses(id),
+        FOREIGN KEY (room_id) REFERENCES rooms(id)
+      );
+    `
+    await connection.query(createBookingsTableQuery);
+    console.log('Bookings table ensured'); 
     
-//     const bookings = [];
-//     for (let i = 0; i < 10; i++) {
+    const insertBookings = Array.from({ length: roomIds.length }).map(async () => {
+      const roomIdArray = Array.from(availableRoomNumbers);
+      const roomId = faker.helpers.arrayElement(roomIdArray);
+      availableRoomNumbers.delete(roomId);
 
-//       if (availableRoomNumbers.size === 0) {
-//         console.log('No more available room numbers to assign.');
-//         break;
-//       }
+      const now = new Date();
+      const DAY_IN_MS = 24*60*60*1000;
 
-//       const roomIdArray = Array.from(availableRoomNumbers);
-//       const roomId = faker.helpers.arrayElement(roomIdArray);
-//       availableRoomNumbers.delete(roomId);
+      const checkInDate = getRandomDate(new Date(now.getTime() - 30*DAY_IN_MS), new Date(now.getTime() + 30*DAY_IN_MS)); 
+      // const checkOutDate = new Date(new Date(checkInDate).getTime() + Math.floor(Math.random() * 20) * DAY_IN_MS).toISOString().split('T')[0]; 
+      const checkOutDate = new Date(new Date(checkInDate).getTime() + Math.floor(Math.random() * 20) * DAY_IN_MS);
 
-//       const now = new Date();
-//       const DAY_IN_MS = 24*60*60*1000;
+      const status = determineBookingStatus(checkInDate, checkOutDate);
 
-//       const checkInDate = getRandomDate(new Date(now.getTime() - 30*DAY_IN_MS), new Date(now.getTime() + 30*DAY_IN_MS)); 
-//       // const checkOutDate = new Date(new Date(checkInDate).getTime() + Math.floor(Math.random() * 20) * DAY_IN_MS).toISOString().split('T')[0]; 
-//       const checkOutDate = new Date(new Date(checkInDate).getTime() + Math.floor(Math.random() * 20) * DAY_IN_MS);
+      // Fetch the status_id from the statuses table
+      const [statusRowList] = await connection.query(
+        'SELECT id FROM booking_statuses WHERE name = ?',
+        [status]
+      );
+      const statusRow = statusRowList as Array<{ id: number }>;
 
-//       bookings.push({
-//         first_name: faker.person.firstName(),
-//         last_name: faker.person.lastName(),
-//         order_date: getRandomOrderDate(checkInDate),//new Date().toISOString().split('T')[0],
-//         check_in: checkInDate,
-//         check_out: checkOutDate,
-//         room: roomId,
-//         status: determineBookingStatus(checkInDate, checkOutDate),
-//         special_request: faker.lorem.sentence()
-//       });
-//     }
+      const statusId = statusRow[0]?.id || null;
 
-//     await Booking.insertMany(bookings)
+      const booking = {
+        status_id: statusId,
+        room_id: roomId,
+        first_name: faker.person.firstName(),
+        last_name: faker.person.lastName(),
+        order_date: getRandomOrderDate(checkInDate),//new Date().toISOString().split('T')[0],
+        check_in: checkInDate,
+        check_out: checkOutDate,
+        special_request: faker.lorem.sentence()
+      }
 
-//     // console.('10 bookings have been seeded');
-//   } catch (error) {
-//     console.error('Error seeding bookings:', error);
+      return connection.query(
+        ' INSERT INTO bookings (status_id, room_id, first_name, last_name, order_date, check_in, check_out, special_request) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [booking.status_id, booking.room_id, booking.first_name, booking.last_name, booking.order_date, booking.check_in, booking.check_out, booking.special_request]
+      );
+    })
+
+    await Promise.all(insertBookings);
+    console.log('10 bookings have been seeded');
+  } catch (error) {
+    console.error('Error seeding bookings:', error);
     
-//     process.exit(1);
-//   }
-// }
+    process.exit(1);
+  } finally {
+    connection.release();
+    
+  }
+}
 
 const createSeedData = async () => {
   await seedContacts();
 
   await seedUsers();
 
-  await seedRooms();
+  const roomIds = await seedRooms();
 
-  // const roomIds = await seedRooms();
-
-  // await seedBookings(roomIds);
+  await seedBookings(roomIds);
 }
 
 export const seedData = async() => {
