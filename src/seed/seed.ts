@@ -1,15 +1,14 @@
-// import mongoose from "mongoose";
 import { ContactStatusType } from "../interfaces/Contact.interface";
 import { faker } from '@faker-js/faker';
-// import { Contact } from "../models/contact.model";
 import { getPool } from "../config/dbMySQL.config";
-// import { User } from "../models/user.model";
-// import { UserJobType, UserStatusType } from "../interfaces/User.interface";
+import { UserJobType, UserStatusType } from "../interfaces/User.interface";
 // import { Room } from "../models/room.model";
-// import { RoomFacility, RoomStatusType, RoomType } from "../interfaces/Room.interface";
+import { RoomFacility, RoomStatusType, RoomType } from "../interfaces/Room.interface";
 // import { BookingStatusType } from "../interfaces/Booking.interface";
 // import { Booking } from "../models/booking.model";
 // import { connectDB, disconnectDB } from "../config/db.config";
+import bcryptjs from "bcryptjs";
+import { ResultSetHeader } from 'mysql2';
 
 const getRandomContactStatus = (): ContactStatusType => {
   const statuses = [ContactStatusType.Unset, ContactStatusType.Archived];
@@ -18,43 +17,43 @@ const getRandomContactStatus = (): ContactStatusType => {
   return statuses[randomIndex];
 };
 
-// const getRandomUserStatus = (): UserStatusType => {
-//   const statuses = [UserStatusType.Active, UserStatusType.Inactive];
-//   const randomIndex = Math.floor(Math.random() * statuses.length);
+const getRandomUserStatus = (): UserStatusType => {
+  const statuses = [UserStatusType.Active, UserStatusType.Inactive];
+  const randomIndex = Math.floor(Math.random() * statuses.length);
   
-//   return statuses[randomIndex];
-// };
+  return statuses[randomIndex];
+};
 
-// const getRandomUserJob = (): UserJobType => {
-//   const jobs = [UserJobType.Manager, UserJobType.Reservation_desk, UserJobType.Room_service];
-//   const randomIndex = Math.floor(Math.random() * jobs.length);
+const getRandomUserJob = (): UserJobType => {
+  const jobs = [UserJobType.Manager, UserJobType.Reservation_desk, UserJobType.Room_service];
+  const randomIndex = Math.floor(Math.random() * jobs.length);
 
-//   return jobs[randomIndex];
-// };
+  return jobs[randomIndex];
+};
 
-// const getRandomRoomType = (): RoomType => {
-//   const roomTypes = [RoomType.Double_bed, RoomType.Double_superior, RoomType.Single_bed, RoomType.Suite];
-//   const randomIndex = Math.floor(Math.random() * roomTypes.length);
+const getRandomRoomType = (): RoomType => {
+  const roomTypes = [RoomType.Double_bed, RoomType.Double_superior, RoomType.Single_bed, RoomType.Suite];
+  const randomIndex = Math.floor(Math.random() * roomTypes.length);
 
-//   return roomTypes[randomIndex];
-// };
+  return roomTypes[randomIndex];
+};
 
-// const getRandomRoomStatusType = (): RoomStatusType => {
-//   const roomStatuses = [RoomStatusType.Available, RoomStatusType.Booked];
-//   const randomIndex = Math.floor(Math.random() * roomStatuses.length);
+const getRandomRoomStatusType = (): RoomStatusType => {
+  const roomStatuses = [RoomStatusType.Available, RoomStatusType.Booked];
+  const randomIndex = Math.floor(Math.random() * roomStatuses.length);
 
-//   return roomStatuses[randomIndex];
-// }
+  return roomStatuses[randomIndex];
+}
 
-// const getRandomFacilities = (count: number) => {
-//   const shuffled = [...Object.values(RoomFacility)].sort(() => 0.5 - Math.random());
-//   return shuffled.slice(0, count);
-// };
+const getRandomFacilities = (count: number) => {
+  const shuffled = [...Object.values(RoomFacility)].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
 
-// const generatePrice = () => {
-//   const price = faker.number.float({ min: 50, max: 500, multipleOf: 0.01 });
-//   return parseFloat(price.toFixed(2));
-// };
+const generatePrice = () => {
+  const price = faker.number.float({ min: 50, max: 500, multipleOf: 0.01 });
+  return parseFloat(price.toFixed(2));
+};
 
 // const getRandomDate = (start: Date, end: Date): Date => {
 //   // Generate a random timestamp between start and end
@@ -112,30 +111,60 @@ const seedContacts = async () => {
   const connection = await pool.getConnection();
 
   try {
-    const dropTableQuery = `DROP TABLE IF EXISTS contacts`;
-    await connection.query(dropTableQuery);
-    console.log('Contacts cleaned before seeding');
+    await connection.query(`DROP TABLE IF EXISTS contacts`);
+    await connection.query(`DROP TABLE IF EXISTS contact_statuses`);
+    console.log('Contacts and Statuses tables cleaned before seeding');
 
-    const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS contacts (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          status ENUM('', 'archived') DEFAULT '',
-          first_name VARCHAR(255) NOT NULL,
-          last_name VARCHAR(255) NOT NULL,
-          email VARCHAR(255) NOT NULL UNIQUE,
-          phone VARCHAR(50) NOT NULL,
-          subject VARCHAR(255) NOT NULL,
-          message TEXT NOT NULL,
-          datetime DATETIME NOT NULL
+    // Create the statuses table
+    const createStatusesTableQuery = `
+      CREATE TABLE IF NOT EXISTS contact_statuses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE
       );
+    `;
+    await connection.query(createStatusesTableQuery);
+    console.log('Statuses table ensured');
+
+    // Insert initial statuses into the statuses table
+    const insertStatusesQuery = `
+      INSERT INTO contact_statuses (name) VALUES ("${ContactStatusType.Unset}"), ("${ContactStatusType.Archived}");
+    `;
+    await connection.query(insertStatusesQuery);
+    console.log('Initial statuses have been inserted');
+
+    const createContactsTableQuery = `
+      CREATE TABLE IF NOT EXISTS contacts (
+        id INT AUTO_INCREMENT,
+        status_id INT,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        phone VARCHAR(50) NOT NULL,
+        subject VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        datetime DATETIME NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (status_id) REFERENCES contact_statuses(id)
+      );    
     `
 
-    await connection.query(createTableQuery);
+    await connection.query(createContactsTableQuery);
     console.log('Contacts table ensured');
 
-    const insertContacts = Array.from({ length: 10 }).map(() => {
+    const insertContacts = Array.from({ length: 10 }).map(async () => {
+      const status = getRandomContactStatus();
+
+      // Fetch the status_id from the statuses table
+      const [statusRowList] = await connection.query(
+        'SELECT id FROM contact_statuses WHERE name = ?',
+        [status]
+      );
+      const statusRow = statusRowList as Array<{ id: number }>;
+
+      const statusId = statusRow[0]?.id || null;
+
       const contact = {
-        status: getRandomContactStatus(),
+        status_id: statusId,
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
         email: faker.internet.email(),
@@ -146,8 +175,8 @@ const seedContacts = async () => {
       };
 
       return connection.query(
-        'INSERT INTO contacts (status, first_name, last_name, email, phone, subject, message, datetime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [contact.status, contact.first_name, contact.last_name, contact.email, contact.phone, contact.subject, contact.message, contact.datetime]
+        'INSERT INTO contacts (status_id, first_name, last_name, email, phone, subject, message, datetime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [contact.status_id, contact.first_name, contact.last_name, contact.email, contact.phone, contact.subject, contact.message, contact.datetime]
       )
     });
 
@@ -164,82 +193,282 @@ const seedContacts = async () => {
   }
 };
 
-// const seedUsers = async () => {
-//   try {
-//     await User.deleteMany({});
-//     // console.('User collection cleared');    
+const seedUsers = async () => {
+  const pool = await getPool();
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.query(`DROP TABLE IF EXISTS users`);
+    await connection.query(`DROP TABLE IF EXISTS user_statuses`);
+    await connection.query(`DROP TABLE IF EXISTS user_jobs`);
+
+    // Create the statuses table
+    const createStatusesTableQuery = `
+      CREATE TABLE IF NOT EXISTS user_statuses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE
+      );
+    `;
+    await connection.query(createStatusesTableQuery);
+    console.log('Statuses table ensured');
+
+    // Insert initial statuses into the statuses table
+    const insertStatusesQuery = `
+      INSERT INTO user_statuses (name) VALUES ("${UserStatusType.Active}"), ("${UserStatusType.Inactive}");
+    `;
+    await connection.query(insertStatusesQuery);
+    console.log('Initial statuses have been inserted');
+
+    // Create the jobs table
+    const createJobsTableQuery = `
+      CREATE TABLE IF NOT EXISTS user_jobs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE
+      );
+    `;
+    await connection.query(createJobsTableQuery);
+    console.log('Jobs table ensured');
+
+    // Insert initial jobs into the jobs table
+    const insertJobsQuery = `
+      INSERT INTO user_jobs (name) VALUES ("${UserJobType.Manager}"), ("${UserJobType.Reservation_desk}"), ("${UserJobType.Room_service}");
+    `;
+    await connection.query(insertJobsQuery);
+    console.log('Initial jobs have been inserted');
+
+    const createUsersTableQuery = `
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT,
+        status_id INT,
+        job_id INT,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        photo VARCHAR(400) NOT NULL,
+        start_date DATETIME NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        job_description VARCHAR(400) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE, 
+        telephone varchar(50) NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (status_id) REFERENCES user_statuses(id),
+        FOREIGN KEY (job_id) REFERENCES user_jobs(id)
+      );
+    `
+    await connection.query(createUsersTableQuery);
+    console.log('Users table ensured');
+
+    const insertUsers = Array.from({ length: 10 }).map(async (_, index) => {
+      const status = getRandomUserStatus();
+
+      // Fetch the status_id from the statuses table
+      const [statusRowList] = await connection.query(
+        'SELECT id FROM user_statuses WHERE name = ?',
+        [status]
+      );
+      const statusRow = statusRowList as Array<{ id: number }>;
+
+      const statusId = statusRow[0]?.id || null;
+
+      const job = getRandomUserJob();
+
+      // Fetch the status_id from the statuses table
+      const [jobRowList] = await connection.query(
+        'SELECT id FROM user_jobs WHERE name = ?',
+        [job]
+      );
+      const jobRow = jobRowList as Array<{ id: number }>;
+
+      const jobId = jobRow[0]?.id || null;
+
+      let user;
+
+      if (index === 9) {
+        user = {
+          status_id: statusId,
+          job_id: jobId,
+          first_name: "Admin",
+          last_name: "Miranda",
+          photo: faker.image.avatar(), 
+          start_date: faker.date.past({ years: 1 }),//.toISOString(),
+          job_description: faker.lorem.sentence(),
+          telephone: faker.phone.number(),
+          password: "0000",
+          email: "admin.miranda@example.com",
+        }
+      } else {
+        user = {
+          status_id: statusId,
+          job_id: jobId,
+          first_name: faker.person.firstName(),
+          last_name: faker.person.lastName(),
+          photo: faker.image.avatarGitHub(), 
+          start_date: faker.date.past({ years: 1 }),
+          job_description: faker.lorem.sentence(),
+          telephone: faker.phone.number(),
+          password: faker.internet.password(),
+          email: faker.internet.email(),
+        };
+      }
+
+      // Generate a salt
+      const salt = await bcryptjs.genSalt(10);
+      // Hash the plain text password
+      user.password = await bcryptjs.hash(user.password, salt);
+
+      return connection.query(
+        ' INSERT INTO users (status_id, job_id, first_name, last_name, photo, start_date, job_description, telephone, password, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [user.status_id, user.job_id, user.first_name, user.last_name, user.photo, user.start_date, user.job_description, user.telephone, user.password, user.email]
+      );
+      
+    });
+
+    await Promise.all(insertUsers);
+    console.log('10 users have been seeded');
+  } catch (error) {
+    console.error('Error seeding contacts:', error);
     
-//     const userPromises = Array.from({ length: 10 }).map(() => {
-//       return User.create({
-//         first_name: faker.person.firstName(),
-//         last_name: faker.person.lastName(),
-//         photo: faker.image.avatarGitHub(), 
-//         start_date: faker.date.past({ years: 1 }).toISOString(),
-//         job_description: faker.lorem.sentence(),
-//         telephone: faker.phone.number(),
-//         status: getRandomUserStatus(),
-//         job: getRandomUserJob(),
-//         password: faker.internet.password(),
-//         email: faker.internet.email(),
-//       });
-//     });
-
-//     const userList = await Promise.all(userPromises);
-
-//     const customUser = await User.create({
-//       first_name: "Admin",
-//       last_name: "Miranda",
-//       photo: faker.image.avatar(), 
-//       start_date: faker.date.past({ years: 1 }),//.toISOString(),
-//       job_description: faker.lorem.sentence(),
-//       telephone: faker.phone.number(),
-//       status: getRandomUserStatus(),
-//       job: getRandomUserJob(),
-//       password: "0000",
-//       email: "admin.miranda@example.com",
-//     });
-
-//     userList.push(customUser)
-
-//     // console.('11 users have been seeded');
-//   } catch (error) {
-//     console.error('Error seeding contacts:', error);
+    process.exit(1);
+  } finally {
+    connection.release();
     
-//     process.exit(1);
-//   }
-// }
+  }
+}
 
-// const seedRooms = async () => {
-//   try {
-//     await Room.deleteMany({});
-//     // console.('Room collection cleared');    
+const seedRooms = async () => {
+  const pool = await getPool();
+  const connection = await pool.getConnection();
 
-//     const roomPromises = Array.from({ length: 10 }).map(( _, index ) => {
-//       return Room.create({
-//         number: index + 1,
-//         description: faker.lorem.sentences(2),
-//         facilities: getRandomFacilities(faker.number.int({ min: 1, max: 5 })),
-//         name: faker.commerce.productName(),
-//         cancellation_policy: "Free cancellation up to 24 hours before check-in.",
-//         has_offer: faker.datatype.boolean(),
-//         type: getRandomRoomType(),
-//         price_night: generatePrice(),
-//         discount: faker.number.int({ min: 0, max: 50 }),
-//         status: getRandomRoomStatusType(),
-//         photos: [faker.image.url(), faker.image.url()]
-//       });
-//     });    
+  try {
+    await connection.query(`DROP TABLE IF EXISTS room_statuses`);
+    await connection.query(`DROP TABLE IF EXISTS rooms`);
+    await connection.query(`DROP TABLE IF EXISTS room_facilities`);
+    await connection.query(`DROP TABLE IF EXISTS rooms_facilities_relation`);
+
+    // Create the statuses table
+    const createStatusesTableQuery = `
+      CREATE TABLE IF NOT EXISTS room_statuses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE
+      );
+    `;
+    await connection.query(createStatusesTableQuery);
+    console.log('Statuses table ensured');
+
+    // Insert initial statuses into the statuses table
+    const insertStatusesQuery = `
+      INSERT INTO room_statuses (name) VALUES ("${RoomStatusType.Available}"), ("${RoomStatusType.Booked}");
+    `;
+    await connection.query(insertStatusesQuery);
+    console.log('Initial statuses have been inserted');
+
+    const createFacilitiesTable = `
+      CREATE TABLE IF NOT EXISTS room_facilities (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) UNIQUE NOT NULL
+      );
+    `;
+    await connection.query(createFacilitiesTable);
+    console.log('Facilitites table ensured');
+
+    const facilities = Object.values(RoomFacility);
+    for (const facility of facilities) {
+      await connection.query(`INSERT IGNORE INTO room_facilities (name) VALUES (?)`, [facility]);
+    }
+    console.log('Initial facilitites have been inserted');
+
+    const createRoomsTable = `
+      CREATE TABLE IF NOT EXISTS rooms (
+        id INT AUTO_INCREMENT,
+        status_id INT,
+        number INT NOT NULL,
+        description TEXT NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        cancellation_policy TEXT,
+        has_offer BOOLEAN,
+        type VARCHAR(50),
+        price_night DECIMAL(10, 2),
+        discount INT,
+        PRIMARY KEY (id),
+        FOREIGN KEY (status_id) REFERENCES room_statuses(id)
+      );
+    `;
+    await connection.query(createRoomsTable);
+    console.log('Rooms table ensured');
+
+    const createRoomsFacilitiesRelationTable = `
+      CREATE TABLE IF NOT EXISTS rooms_facilities_relation (
+        room_id INT,
+        facility_id INT,
+        PRIMARY KEY (room_id, facility_id),
+        FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
+        FOREIGN KEY (facility_id) REFERENCES room_facilities(id) ON DELETE CASCADE
+      );
+    `;
+    await connection.query(createRoomsFacilitiesRelationTable);
+
+    const roomPromises = Array.from({ length: 10 }).map(async (_, index) => {
+      const status = getRandomRoomStatusType();
+
+      // Fetch the status_id from the statuses table
+      const [statusRowList] = await connection.query(
+        'SELECT id FROM room_statuses WHERE name = ?',
+        [status]
+      );
+      const statusRow = statusRowList as Array<{ id: number }>;
+
+      const statusId = statusRow[0]?.id || null;
+      
+      const room = {
+        status_id: statusId,
+        number: index + 1,
+        description: faker.lorem.sentences(2),
+        facilities: getRandomFacilities(faker.number.int({ min: 1, max: 5 })),
+        name: faker.commerce.productName(),
+        cancellation_policy: "Free cancellation up to 24 hours before check-in.",
+        has_offer: faker.datatype.boolean(),
+        type: getRandomRoomType(),
+        price_night: generatePrice(),
+        discount: faker.number.int({ min: 0, max: 50 }),
+      };
+
+      const [result] = await connection.query<ResultSetHeader>(
+        `INSERT INTO rooms 
+         (status_id, number, description, name, cancellation_policy, has_offer, type, price_night, discount)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [room.status_id, room.number, room.description, room.name, room.cancellation_policy, room.has_offer, room.type, room.price_night, room.discount]
+      );
+
+      const roomId = result.insertId;
+
+      // Insert room facilities into the room_facilities table
+      for (const facility of room.facilities) {
+        const [facilityResult] = await connection.query(
+          `SELECT id FROM room_facilities WHERE name = ?`, 
+          [facility]
+        );
+        const facilityRow = facilityResult as Array<{ id: number }>;
+
+        const facilityId = facilityRow[0]!.id;
+
+        await connection.query(`INSERT INTO rooms_facilities_relation (room_id, facility_id) VALUES (?, ?)`, [roomId, facilityId]);
+      };
+
+    });
+
+    await Promise.all(roomPromises);
+    console.log('10 rooms have been seeded');
+
+    //   return rooms.map(room => room._id); 
+  } catch(error) {
+    console.error('Error seeding rooms:', error);
     
-//     const rooms = await Promise.all(roomPromises);
-//     // console.('10 rooms have been seeded');
-
-//     return rooms.map(room => room._id); 
-//   } catch (error) {
-//     console.error('Error seeding rooms:', error);
+    process.exit(1);
+  } finally {
+    connection.release();
     
-//     process.exit(1);
-//   }
-// }
+  }
+
+}
 
 // const seedBookings = async (roomIds: mongoose.Types.ObjectId[]) => {
 //   const availableRoomNumbers = new Set(roomIds);
@@ -292,7 +521,9 @@ const seedContacts = async () => {
 const createSeedData = async () => {
   await seedContacts();
 
-  // await seedUsers();
+  await seedUsers();
+
+  await seedRooms();
 
   // const roomIds = await seedRooms();
 
