@@ -3,6 +3,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
 import { createUser, deleteUser, getUserById, getUserList, updateUser } from '../services/user.service';
+import { dataValidationMiddleware } from '../middlewares/data.middleware';
+import userSchema from '../validators/joiSchemas.validator';
 
 const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -61,8 +63,8 @@ const updateOne = async (req: Request, res: Response, next: NextFunction) => {
 export const router = express.Router();
 
 router.get("/", headers, list);
-router.post("/", headers, create);
+router.post("/", headers, dataValidationMiddleware(userSchema), create);
 router.get("/:userId", headers, detail);
 router.delete("/:userId", headers, deleteOne);
-router.patch("/:userId", headers, updateOne);
+router.patch("/:userId", headers, dataValidationMiddleware(userSchema, true), updateOne);
 

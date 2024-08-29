@@ -4,8 +4,8 @@ import { getPool } from "../config/dbMySQL.config";
 import { UserJobType, UserStatusType } from "../interfaces/User.interface";
 import { RoomFacility, RoomStatusType, RoomType } from "../interfaces/Room.interface";
 import { BookingStatusType } from "../interfaces/Booking.interface";
-import bcryptjs from "bcryptjs";
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { hashPassword } from "../utils/password";
 
 const getRandomContactStatus = (): ContactStatusType => {
   const statuses = [ContactStatusType.Unset, ContactStatusType.Archived];
@@ -108,10 +108,6 @@ const seedContacts = async () => {
   const connection = await pool.getConnection();
 
   try {
-    // await connection.query(`DROP TABLE IF EXISTS contacts`);
-    // await connection.query(`DROP TABLE IF EXISTS contact_statuses`);
-    // console.log('Contacts and Statuses tables cleaned before seeding');
-
     // Create the statuses table
     const createStatusesTableQuery = `
       CREATE TABLE IF NOT EXISTS contact_statuses (
@@ -156,7 +152,6 @@ const seedContacts = async () => {
         'SELECT id FROM contact_statuses WHERE name = ?',
         [status]
       );
-      // const statusRow = statusRowList as Array<{ id: number }>;
       const statusId = statusRowList[0]?.id || null;
 
       const contact = {
@@ -194,10 +189,6 @@ const seedUsers = async () => {
   const connection = await pool.getConnection();
 
   try {
-    // await connection.query(`DROP TABLE IF EXISTS users`);
-    // await connection.query(`DROP TABLE IF EXISTS user_statuses`);
-    // await connection.query(`DROP TABLE IF EXISTS user_jobs`);
-
     // Create the statuses table
     const createStatusesTableQuery = `
       CREATE TABLE IF NOT EXISTS user_statuses (
@@ -261,7 +252,6 @@ const seedUsers = async () => {
         'SELECT id FROM user_statuses WHERE name = ?',
         [status]
       );
-      // const statusRow = statusRowList as Array<{ id: number }>;
       const statusId = statusRowList[0]?.id || null;
 
       const job = getRandomUserJob();
@@ -271,7 +261,6 @@ const seedUsers = async () => {
         'SELECT id FROM user_jobs WHERE name = ?',
         [job]
       );
-      // const jobRow = jobRowList as Array<{ id: number }>;
       const jobId = jobRowList[0]?.id || null;
 
       let user;
@@ -283,7 +272,7 @@ const seedUsers = async () => {
           first_name: "Admin",
           last_name: "Miranda",
           photo: faker.image.avatar(), 
-          start_date: faker.date.past({ years: 1 }),//.toISOString(),
+          start_date: faker.date.past({ years: 1 }).toISOString().slice(0, 19).replace('T', ' '),
           job_description: faker.lorem.sentence(),
           telephone: faker.phone.number(),
           password: "0000",
@@ -303,11 +292,8 @@ const seedUsers = async () => {
           email: faker.internet.email(),
         };
       }
-
-      // Generate a salt
-      const salt = await bcryptjs.genSalt(10);
       // Hash the plain text password
-      user.password = await bcryptjs.hash(user.password, salt);
+      user.password = await hashPassword(user.password);
 
       return connection.query(
         ' INSERT INTO users (status_id, job_id, first_name, last_name, photo, start_date, job_description, telephone, password, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -333,11 +319,6 @@ const seedRooms = async (): Promise<number[]> => {
   const connection = await pool.getConnection();
 
   try {
-    // await connection.query(`DROP TABLE IF EXISTS rooms_facilities_relation`);
-    // await connection.query(`DROP TABLE IF EXISTS rooms`);
-    // await connection.query(`DROP TABLE IF EXISTS room_statuses`);
-    // await connection.query(`DROP TABLE IF EXISTS room_facilities`);
-
     // Create the statuses table
     const createStatusesTableQuery = `
       CREATE TABLE IF NOT EXISTS room_statuses (
@@ -410,7 +391,6 @@ const seedRooms = async (): Promise<number[]> => {
         'SELECT id FROM room_statuses WHERE name = ?',
         [status]
       );
-      // const statusRow = statusRowList as Array<{ id: number }>;
       const statusId = statusRowList[0]?.id || null;
       
       const room = {
@@ -473,8 +453,6 @@ const seedBookings = async (roomIds: number[]) => {
   const connection = await pool.getConnection();
 
   try {
-    // await connection.query(`DROP TABLE IF EXISTS booking_statuses`);
-
     // Create the statuses table
     const createStatusesTableQuery = `
       CREATE TABLE IF NOT EXISTS booking_statuses (
@@ -530,7 +508,6 @@ const seedBookings = async (roomIds: number[]) => {
         'SELECT id FROM booking_statuses WHERE name = ?',
         [status]
       );
-      // const statusRow = statusRowList as Array<{ id: number }>;
       const statusId = statusRowList[0]?.id || null;
 
       const booking = {

@@ -6,7 +6,7 @@ import {
 } from "../interfaces/User.interface";
 import bcryptjs from "bcryptjs";
 import { APIError } from "../utils/APIError";
-import { emailRegex } from "../utils/validator";
+import { emailRegex } from "../utils/password";
 
 const userSchema = new Schema<UserInterface>(
   {

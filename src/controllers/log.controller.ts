@@ -4,7 +4,7 @@ import { APIError } from "../utils/APIError";
 import { getPool } from "../config/dbMySQL.config";
 import { UserInterface } from "../interfaces/User.interface";
 import { RowDataPacket } from "mysql2";
-import { checkPassword } from "../utils/validator";
+import { checkPassword } from "../utils/password";
 
 export const login = async (
   req: Request,
@@ -20,10 +20,10 @@ export const login = async (
   const [userRowList] = await connection.query<UserInterface[] & RowDataPacket[]>(
     `SELECT * FROM users WHERE email = ? `,
     [email]
-  )
-  const user = userRowList[0];
-
+  );
   connection.release();
+
+  const user = userRowList[0];
 
   if (!user) {
     res.status(404).json({ message: "User not found" });

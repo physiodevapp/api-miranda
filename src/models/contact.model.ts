@@ -3,7 +3,7 @@ import {
   ContactInterface,
   ContactStatusType,
 } from "../interfaces/Contact.interface";
-import { emailRegex } from "../utils/validator";
+import { emailRegex } from "../utils/password";
 import { APIError } from "../utils/APIError";
 
 const contactSchema = new Schema<ContactInterface>(
