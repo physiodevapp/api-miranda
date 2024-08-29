@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { generateToken } from "../utils/token";
 import { APIError } from "../utils/APIError";
-import { User } from "../models/user.model";
+import { getPool } from "../config/dbMySQL.config";
+import { UserInterface } from "../interfaces/User.interface";
+import { RowDataPacket } from "mysql2";
+import { checkPassword } from "../utils/validator";
 
 export const login = async (
   req: Request,
@@ -9,14 +12,23 @@ export const login = async (
   next: NextFunction
 ) => {
   const { email, password } = req.body;
-  console.log('req.body ', req.body)
+  console.log('req.body ', req.body);
 
-  const user = await User.findOne({ email });
+  const pool = await getPool();
+  const connection = await pool.getConnection();
+
+  const [userRowList] = await connection.query<UserInterface[] & RowDataPacket[]>(
+    `SELECT * FROM users WHERE email = ? `,
+    [email]
+  )
+  const user = userRowList[0];
+
+  connection.release();
 
   if (!user) {
     res.status(404).json({ message: "User not found" });
   } else {
-    const isValid = await user.checkPassword(password);
+    const isValid = await checkPassword(password, user.password);
     if (isValid) {
       const payload = { email, password };
 
