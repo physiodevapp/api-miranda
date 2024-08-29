@@ -6,7 +6,7 @@ export enum ContactStatusType {
 
 export interface ContactInterface {
   id: string,
-  status: ContactStatusType,
+  status_id: number,
   first_name: string,
   last_name: string,
   email: string,
@@ -14,6 +14,7 @@ export interface ContactInterface {
   subject: string,
   message: string,
   datetime: Date,
+  status?: ContactStatusType,
   createdAt?: Date,
   updatedAt?: Date,
 };

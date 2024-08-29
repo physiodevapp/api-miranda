@@ -104,10 +104,8 @@ export const getRoomList = async (): Promise<(Partial<RoomInterface> | undefined
 
       room.has_offer = !!room.has_offer;
 
-      // Exclude job_id and status_id from the user object
       const { status_id, ...roomWithoutIds } = room;
 
-      // Return the user with the additional related fields
       return roomWithoutIds;
     }));
 

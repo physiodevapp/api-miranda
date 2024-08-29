@@ -107,25 +107,23 @@ export const getUserList = async (searchTerm: string = ""): Promise<(Partial<Use
       const statusValue = user.status_id ? await getRelatedFieldName({ connection, table: 'user_statuses', column: 'name', id: user.status_id }) : null;
       user.status = statusValue as UserStatusType;
 
-      // Exclude job_id and status_id from the user object
       const { job_id, status_id, ...userWithoutIds } = user;
 
-      // Return the user with the additional related fields
       return userWithoutIds;
     }));
     
     connection.release();
     
     return userList;
-  } catch (error) {
-    
+  } catch (error) {    
     throw error;
+
   }
 };
 
 export const createUser = async (
   userData: UserInterface
-): Promise<UserInterface | void> => {
+): Promise<Partial<UserInterface> | void> => {
   try {
     const pool = await getPool();
     const connection = await pool.getConnection();
@@ -157,9 +155,18 @@ export const createUser = async (
       'SELECT * FROM users WHERE id = ?',
       [newUserId]
     );
+
+    const userRowCreated = userRowList[0];
+
+    const jobValue = await getRelatedFieldName({connection, table: 'user_jobs', column: 'name', id: userRowCreated.job_id!});
+    userRowCreated.job = jobValue as UserJobType;
+
+    const statusValue = await getRelatedFieldName({connection, table: 'user_statuses', column: 'name', id: userRowCreated.status_id!});
+    userRowCreated.status = statusValue as UserStatusType;
+
     connection.release();
-    
-    const newUser = userRowList[0];
+
+    const { job_id, status_id, ...newUser } = userRowCreated;
 
     return newUser;
   } catch (error) {    

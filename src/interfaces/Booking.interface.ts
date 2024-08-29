@@ -8,14 +8,15 @@ export enum BookingStatusType {
 
 export interface BookingInterface {
   id: string,
+  status_id: number,
   first_name: string,
   last_name: string,
   order_date: Date,
   check_in: Date,
   check_out: Date,
   room: Types.ObjectId,
-  status: BookingStatusType,
   special_request: string,
+  status?: BookingStatusType,
   createdAt?: Date,
   updatedAt?: Date,
 }
