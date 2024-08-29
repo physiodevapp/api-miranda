@@ -4,7 +4,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
 import { createUser, deleteUser, getUserById, getUserList, updateUser } from '../services/user.service';
 import { dataValidationMiddleware } from '../middlewares/data.middleware';
-import userSchema from '../validators/joiSchemas.validator';
+import { userSchema } from '../validators/joiSchemas.validator';
 
 const list = async (req: Request, res: Response, next: NextFunction) => {
   try {

@@ -1,4 +1,4 @@
-import { UserInterface } from "../interfaces/User.interface";
+import { UserInterface, UserJobType, UserStatusType } from "../interfaces/User.interface";
 import { APIError } from "../utils/APIError";
 import { getPool } from "../config/dbMySQL.config";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
@@ -11,6 +11,30 @@ interface relatedFieldIdArgs {
   table: string;
   column: string;
 }
+
+interface relatedFieldNameArgs {
+  id: number;
+  connection: PoolConnection;
+  table: string;
+  column: string;
+}
+
+const getRelatedFieldName = async ({ id, connection, table, column }: relatedFieldNameArgs): Promise<string | null> => {
+  try {
+    const [rowList] = await connection.query<RowDataPacket[]>(
+      `SELECT ${column} FROM ${table} WHERE id = ?`,
+      [id]
+    );
+
+    if (rowList.length === 0) {
+      throw new APIError({ message: `ID '${id}' not found`, status: 400, safe: true });
+    }
+
+    return rowList[0][column];
+  } catch (error) {
+    throw error;
+  }
+};
 
 const getRelatedFieldId = async ({value, connection, table, column}: relatedFieldIdArgs): Promise<number | null> => {
   try {
@@ -31,7 +55,7 @@ const getRelatedFieldId = async ({value, connection, table, column}: relatedFiel
 
 export const getUserById = async (
   userId: string
-): Promise<UserInterface | void> => {
+): Promise<Partial<UserInterface> | void> => {
   try {
     const pool = await getPool();
     const connection = await pool.getConnection();
@@ -40,11 +64,20 @@ export const getUserById = async (
       `SELECT * FROM users WHERE id = ? `,
       [userId]
     );
+    
+    const userRow = userRowList[0];
+
+    if (!userRow) throw new APIError({message: "User not found", status: 404, safe: true});
+
+    const jobValue = await getRelatedFieldName({connection, table: 'user_jobs', column: 'name', id: userRow.job_id!});
+    userRow.job = jobValue as UserJobType;
+
+    const statusValue = await getRelatedFieldName({connection, table: 'user_statuses', column: 'name', id: userRow.status_id!});
+    userRow.status = statusValue as UserStatusType;
+    
     connection.release();
 
-    const user = userRowList[0];
-
-    if (!user) throw new APIError({message: "User not found", status: 404, safe: true});
+    const { job_id, status_id, ...user  } = userRow;
 
     return user;
   } catch (error) {
@@ -53,21 +86,35 @@ export const getUserById = async (
   }
 };
 
-export const getUserList = async (searchTerm: string = ""): Promise<UserInterface[] | void> => {
-
+export const getUserList = async (searchTerm: string = ""): Promise<(Partial<UserInterface> | undefined)[] | void> => {
   try {
     const formattedSearchTerm = `%${searchTerm}%`;
 
     const pool = await getPool();
     const connection = await pool.getConnection();
 
-    const [userList] = await connection.query<UserInterface[] & RowDataPacket[]>(
+    const [userRowList] = await connection.query<UserInterface[] & RowDataPacket[]>(
       `SELECT * FROM users WHERE first_name LIKE ? OR last_name LIKE ?`,
       [formattedSearchTerm, formattedSearchTerm]
     );
-    connection.release();
+     
+    if (!userRowList) throw new APIError({message: "Users not found", status: 404, safe: true});
 
-    if (!userList) throw new APIError({message: "Users not found", status: 404, safe: true});
+    const userList = await Promise.all(userRowList.map(async (user) => {
+      const jobValue = user.job_id ? await getRelatedFieldName({ connection, table: 'user_jobs', column: 'name', id: user.job_id }) : null;
+      user.job = jobValue as UserJobType;
+
+      const statusValue = user.status_id ? await getRelatedFieldName({ connection, table: 'user_statuses', column: 'name', id: user.status_id }) : null;
+      user.status = statusValue as UserStatusType;
+
+      // Exclude job_id and status_id from the user object
+      const { job_id, status_id, ...userWithoutIds } = user;
+
+      // Return the user with the additional related fields
+      return userWithoutIds;
+    }));
+    
+    connection.release();
     
     return userList;
   } catch (error) {
@@ -115,9 +162,9 @@ export const createUser = async (
     const newUser = userRowList[0];
 
     return newUser;
-  } catch (error) {
-    
+  } catch (error) {    
     throw error;
+
   }
 };
 
@@ -130,7 +177,6 @@ export const deleteUser = async (userId: string): Promise<void> => {
       `DELETE FROM users WHERE id = ?`,
       [userId]
     );
-
     connection.release();
 
     if (result.affectedRows === 0) 
@@ -144,7 +190,7 @@ export const deleteUser = async (userId: string): Promise<void> => {
 export const updateUser = async (
   userId: string,
   userData: UserInterface
-): Promise<UserInterface | void> => {
+): Promise<Partial<UserInterface> | void> => {
   try {
     const pool = await getPool();
     const connection = await pool.getConnection();
@@ -187,12 +233,21 @@ export const updateUser = async (
       `SELECT * FROM users WHERE id = ? `,
       [userId]
     );
-    connection.release();
   
-    const userUpdated = userUpdatedRowList[0];
+    const userRowUpdated = userUpdatedRowList[0];
 
-    if (!userUpdated) 
+    if (!userRowUpdated) 
       throw new APIError({message: "Updated user not found", status: 404, safe: true});
+
+    const jobValue = await getRelatedFieldName({connection, table: 'user_jobs', column: 'name', id: userRowUpdated.job_id!});
+    userRowUpdated.job = jobValue as UserJobType;
+
+    const statusValue = await getRelatedFieldName({connection, table: 'user_statuses', column: 'name', id: userRowUpdated.status_id!});
+    userRowUpdated.status = statusValue as UserStatusType;
+
+    connection.release();
+
+    const { job_id, status_id, ...userUpdated } = userRowUpdated;
 
     return userUpdated;
   } catch (error) {    

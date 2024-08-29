@@ -25,6 +25,7 @@ export enum RoomFacility {
 
 export interface RoomInterface {
   id: string,
+  status_id: number,
   number: number,
   description: string,
   facilities: string[],
@@ -34,8 +35,8 @@ export interface RoomInterface {
   type: RoomType,
   price_night: number,
   discount: number,
-  status: RoomStatusType,
   photos: string[],
+  status?: RoomStatusType,
   createdAt?: Date,
   updatedAt?: Date,
 }

@@ -1,6 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
 import { createRoom, deleteRoom, getRoomById, getRoomList, updateRoom } from '../services/room.service';
+import { dataValidationMiddleware } from '../middlewares/data.middleware';
+import { roomSchema } from '../validators/joiSchemas.validator';
 
 const list = async (_req: Request, res: Response, next: NextFunction) => {
   try {
@@ -57,7 +59,7 @@ const updateOne = async (req: Request, res: Response, next: NextFunction) => {
 export const router = express.Router();
 
 router.get("/", headers, list);
-router.post("/", headers, create);
+router.post("/", headers, dataValidationMiddleware(roomSchema), create);
 router.get("/:roomId", headers, detail);
 router.delete("/:roomId", headers, deleteOne);
-router.patch("/:roomId", headers, updateOne);
+router.patch("/:roomId", headers, dataValidationMiddleware(roomSchema, true), updateOne);

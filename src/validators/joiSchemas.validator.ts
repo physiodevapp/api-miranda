@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { UserJobType, UserStatusType } from '../interfaces/User.interface';
+import { RoomFacility, RoomStatusType, RoomType } from '../interfaces/Room.interface';
 
 // Email regex pattern
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,7 +23,7 @@ const transformDate = (value: any, helpers: Joi.CustomHelpers) => {
   return parsedDate;
 };
 
-const userSchema = Joi.object({
+export const userSchema = Joi.object({
   first_name: Joi.string()
     .required()
     .messages({
@@ -109,4 +110,82 @@ const userSchema = Joi.object({
     }),
 });
 
-export default userSchema;
+export const roomSchema = Joi.object({
+  number: Joi.number()
+    .required()
+    .messages({
+      'number.base': 'Room number must be a number',
+      'any.required': 'Room number is required',
+    }),
+  
+  description: Joi.string()
+    .allow('', null) // Allow empty or null if optional
+    .messages({
+      'string.base': 'Description must be a string',
+    }),
+
+  facilities: Joi.array()
+    .items(Joi.string().valid(...Object.values(RoomFacility)))
+    .messages({
+      'array.base': 'Facilities must be an array of strings',
+      'string.base': 'Each facility must be a string',
+      'any.only': 'Facility must be one of the valid values',
+    }),
+
+  name: Joi.string()
+    .required()
+    .messages({
+      'string.base': 'Name must be a string',
+      'any.required': 'Name is required',
+    }),
+
+  cancellation_policy: Joi.string()
+    .required()
+    .messages({
+      'string.base': 'Cancellation policy must be a string',
+      'any.required': 'Cancellation policy is required',
+    }),
+
+  has_offer: Joi.boolean()
+    .default(false)
+    .messages({
+      'boolean.base': 'Has offer must be a boolean',
+    }),
+
+  type: Joi.string()
+    .valid(...Object.values(RoomType))
+    .default(RoomType.Double_bed)
+    .messages({
+      'string.base': 'Type must be a string',
+      'any.only': 'Type must be one of the valid values',
+    }),
+
+  price_night: Joi.number()
+    .required()
+    .messages({
+      'number.base': 'Price per night must be a number',
+      'any.required': 'Price per night is required',
+    }),
+
+  discount: Joi.number()
+    .default(0)
+    .messages({
+      'number.base': 'Discount must be a number',
+    }),
+
+  status: Joi.string()
+    .valid(...Object.values(RoomStatusType))
+    .default(RoomStatusType.Available)
+    .messages({
+      'string.base': 'Status must be a string',
+      'any.only': 'Status must be one of the valid values',
+    }),
+
+  // photos: Joi.array()
+  //   .items(Joi.string().uri()) // Assuming photos are URLs, use .uri() to validate them
+  //   .messages({
+  //     'array.base': 'Photos must be an array of strings',
+  //     'string.base': 'Each photo must be a string',
+  //     'string.uri': 'Each photo must be a valid URI',
+  //   }),
+});
