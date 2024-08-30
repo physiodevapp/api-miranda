@@ -7,6 +7,7 @@ export enum BookingStatusType {
 }
 
 export interface BookingInterface {
+  [key: string]: any;
   id: string,
   first_name: string,
   last_name: string,

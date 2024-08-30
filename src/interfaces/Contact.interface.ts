@@ -5,6 +5,7 @@ export enum ContactStatusType {
 }
 
 export interface ContactInterface {
+  [key: string]: any;
   id: string,
   status: ContactStatusType,
   first_name: string,
