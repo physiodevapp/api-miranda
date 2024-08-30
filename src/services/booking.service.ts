@@ -41,7 +41,7 @@ export const getBookingById = async (
         SELECT 
           b.*, 
           r.id AS room_id, r.number, r.description, r.name AS room_name, 
-          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, r.status_id AS room_status_id,
+          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, r.photos, r.status_id AS room_status_id,
           GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
         FROM 
           bookings b
@@ -77,6 +77,7 @@ export const getBookingById = async (
       type, 
       price_night, 
       discount, 
+      photos,
       room_status_id,
       facilities,
       ...booking
@@ -97,7 +98,8 @@ export const getBookingById = async (
       price_night,
       discount,
       status: roomStatusValue as RoomStatusType,
-      facilities
+      facilities,
+      photos,
     }
 
     return {
@@ -125,7 +127,7 @@ export const getBookingList = async (
         SELECT
           b.*, 
           r.id AS room_id, r.number, r.description, r.name AS room_name, 
-          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, 
+          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, r.photos, 
           r.status_id AS room_status_id,
           GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
         FROM 
@@ -164,6 +166,7 @@ export const getBookingList = async (
         discount,
         room_status_id,
         facilities,
+        photos,
         ...bookingWithoutRoomFields
       } = booking;
 
@@ -181,6 +184,7 @@ export const getBookingList = async (
         discount,
         status: roomStatusValue,
         facilities,
+        photos,
       };
 
       return {

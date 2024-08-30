@@ -363,6 +363,7 @@ const seedRooms = async (): Promise<number[]> => {
         type VARCHAR(50),
         price_night DECIMAL(10, 2),
         discount INT,
+        photos VARCHAR(1000),
         PRIMARY KEY (id),
         FOREIGN KEY (status_id) REFERENCES room_statuses(id)
       );
@@ -404,13 +405,14 @@ const seedRooms = async (): Promise<number[]> => {
         type: getRandomRoomType(),
         price_night: generatePrice(),
         discount: faker.number.int({ min: 0, max: 50 }),
+        photos: `${faker.image.url()}, ${faker.image.url()}`
       };
 
       const [result] = await connection.query<ResultSetHeader>(
         `INSERT INTO rooms 
-         (status_id, number, description, name, cancellation_policy, has_offer, type, price_night, discount)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [room.status_id, room.number, room.description, room.name, room.cancellation_policy, room.has_offer, room.type, room.price_night, room.discount]
+         (status_id, number, description, name, cancellation_policy, has_offer, type, price_night, discount, photos)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [room.status_id, room.number, room.description, room.name, room.cancellation_policy, room.has_offer, room.type, room.price_night, room.discount, room.photos]
       );
 
       const roomId = result.insertId;
