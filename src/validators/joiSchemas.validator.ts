@@ -181,11 +181,11 @@ export const roomSchema = Joi.object({
       'any.only': 'Status must be one of the valid values',
     }),
 
-  // photos: Joi.array()
-  //   .items(Joi.string().uri()) // Assuming photos are URLs, use .uri() to validate them
-  //   .messages({
-  //     'array.base': 'Photos must be an array of strings',
-  //     'string.base': 'Each photo must be a string',
-  //     'string.uri': 'Each photo must be a valid URI',
-  //   }),
+  photos: Joi.array()
+    .items(Joi.string().uri()) // Assuming photos are URLs, use .uri() to validate them
+    .messages({
+      'array.base': 'Photos must be an array of strings',
+      'string.base': 'Each photo must be a string',
+      'string.uri': 'Each photo must be a valid URI',
+    }),
 });

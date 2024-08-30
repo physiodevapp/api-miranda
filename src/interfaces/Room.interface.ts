@@ -35,7 +35,7 @@ export interface RoomInterface {
   type: RoomType,
   price_night: number,
   discount: number,
-  photos?: string[],
+  photos: string | string[],
   status?: RoomStatusType,
   createdAt?: Date,
   updatedAt?: Date,

@@ -157,6 +157,8 @@ export const createRoom = async (
     delete roomData.status;
 
     const { facilities, ...roomFields } = roomData;
+    if (roomFields.photos && Array.isArray(roomFields.photos))
+      roomFields.photos = roomFields.photos.join(', ');
     const fields = Object.keys(roomFields).join(', ');
     const placeholders = Object.keys(roomFields).map(() => '?').join(', ');
     const values = Object.values(roomFields);
@@ -274,18 +276,19 @@ export const updateRoom = async (
       roomFields.status_id = statusId as number;
       delete roomFields.status;
     }
-
     const [roomRowList] = await connection.query<RoomInterface[] & RowDataPacket[]>(
       `SELECT * FROM rooms WHERE id = ? `,
       [roomId]
     );
-
+    
     const roomRow = roomRowList[0];
 
     if (!roomRow) 
       throw new APIError({message: "Room not found", status: 404, safe: true});
 
     const updateFields = Object.keys(roomFields).map(key => `${key} = ?`).join(', ');
+    if (roomFields.photos && Array.isArray(roomFields.photos))
+      roomFields.photos = roomFields.photos.join(', ');
     const updateValues = Object.values(roomFields);
     updateValues.push(roomId);
 
@@ -297,10 +300,11 @@ export const updateRoom = async (
     if (result.affectedRows === 0)
       throw new APIError({ message: "Update failed", status: 500, safe: true });
 
-    await connection.query<ResultSetHeader>(
-      'DELETE FROM rooms_facilities_relation WHERE room_id = ?',
-      [roomId]
-    );    
+    if (roomData.photos)
+      await connection.query<ResultSetHeader>(
+        'DELETE FROM rooms_facilities_relation WHERE room_id = ?',
+        [roomId]
+      );    
     
     if (facilities) {
       for (const facilityName of facilities) {
@@ -343,8 +347,6 @@ export const updateRoom = async (
     
     if (!roomRowUpdated) 
       throw new APIError({message: "Updated room not found", status: 404, safe: true});
-
-    await connection.commit();
     
     const statusValue = await getRelatedFieldName({connection, table: 'room_statuses', column: 'name', id: roomRowUpdated.status_id!});
     roomRowUpdated.status = statusValue as RoomStatusType;
