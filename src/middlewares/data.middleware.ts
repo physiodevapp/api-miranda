@@ -9,7 +9,10 @@ export const dataValidationMiddleware = (schema: ObjectSchema, makeFieldsOptiona
     if (makeFieldsOptional)
       modifiedSchema = schema.fork(Object.keys(schema.describe().keys), (field) => field.optional());
 
-    const { error, value } = modifiedSchema.validate(req.body, { abortEarly: false });
+    const { error, value } = modifiedSchema.validate(req.body, { 
+      abortEarly: false ,
+      noDefaults: makeFieldsOptional,
+    });
 
     if (error) {
       console.error('Validation error:', error);

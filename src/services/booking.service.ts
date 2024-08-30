@@ -41,10 +41,20 @@ export const getBookingById = async (
         SELECT 
           b.*, 
           r.id AS room_id, r.number, r.description, r.name AS room_name, 
-          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, r.status_id AS room_status_id
-        FROM bookings b
-        INNER JOIN rooms r ON b.room_id = r.id
-        WHERE b.id = ?
+          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, r.status_id AS room_status_id,
+          GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
+        FROM 
+          bookings b
+        INNER JOIN 
+          rooms r ON b.room_id = r.id
+        LEFT JOIN 
+          rooms_facilities_relation rfr ON r.id = rfr.room_id
+        LEFT JOIN 
+          room_facilities f ON rfr.facility_id = f.id
+        WHERE 
+          b.id = ?
+        GROUP BY 
+          b.id, r.id;
       `,
       [bookingId]
     );
@@ -68,6 +78,7 @@ export const getBookingById = async (
       price_night, 
       discount, 
       room_status_id,
+      facilities,
       ...booking
     } = bookingRow;
 
@@ -85,7 +96,8 @@ export const getBookingById = async (
       type,
       price_night,
       discount,
-      status: roomStatusValue as RoomStatusType
+      status: roomStatusValue as RoomStatusType,
+      facilities
     }
 
     return {
@@ -113,10 +125,21 @@ export const getBookingList = async (
         SELECT
           b.*, 
           r.id AS room_id, r.number, r.description, r.name AS room_name, 
-          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, r.status_id AS room_status_id
-        FROM bookings b
-        INNER JOIN rooms r ON b.room_id = r.id
-        WHERE first_name LIKE ? OR last_name LIKE ?
+          r.cancellation_policy, r.has_offer, r.type, r.price_night, r.discount, 
+          r.status_id AS room_status_id,
+          GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
+        FROM 
+          bookings b
+        INNER JOIN 
+          rooms r ON b.room_id = r.id
+        LEFT JOIN 
+          rooms_facilities_relation rfr ON r.id = rfr.room_id
+        LEFT JOIN 
+          room_facilities f ON rfr.facility_id = f.id
+        WHERE 
+          b.first_name LIKE ? OR b.last_name LIKE ?
+        GROUP BY 
+          b.id, r.id
       `,
       [formattedSearchTerm, formattedSearchTerm]
     );
@@ -126,10 +149,6 @@ export const getBookingList = async (
     const bookingList = await Promise.all(bookingRowList.map(async (booking: any) => {
       const bookingStatusValue = booking.status_id ? await getRelatedFieldName({ connection, table: 'booking_statuses', column: 'name', id: booking.status_id }) : null;
       booking.status = bookingStatusValue as BookingStatusType;
-
-      // const { status_id, ...bookingWithoutIds } = booking;
-
-      // return bookingWithoutIds;
 
       const {
         status_id,
@@ -144,6 +163,7 @@ export const getBookingList = async (
         price_night,
         discount,
         room_status_id,
+        facilities,
         ...bookingWithoutRoomFields
       } = booking;
 
@@ -160,6 +180,7 @@ export const getBookingList = async (
         price_night,
         discount,
         status: roomStatusValue,
+        facilities,
       };
 
       return {

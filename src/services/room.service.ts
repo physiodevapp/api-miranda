@@ -63,7 +63,20 @@ export const getRoomById = async (
     const connection = await pool.getConnection();
 
     const [roomRowList] = await connection.query<RoomInterface[] & RowDataPacket[]>(
-      `SELECT * FROM rooms WHERE id = ? `,
+      `
+        SELECT 
+          r.*, GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
+        FROM 
+          rooms r
+        JOIN 
+          rooms_facilities_relation rfr ON r.id = rfr.room_id
+        JOIN 
+          room_facilities f ON rfr.facility_id = f.id
+        WHERE 
+          r.id = ?
+        GROUP BY 
+          r.id;
+      `,
       [roomId]
     );
 
@@ -93,7 +106,18 @@ export const getRoomList = async (): Promise<(Partial<RoomInterface> | undefined
     const connection = await pool.getConnection();
 
     const [roomRowList] = await connection.query<RoomInterface[] & RowDataPacket[]>(
-      `SELECT * FROM rooms`
+      `
+        SELECT 
+          r.*, GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
+        FROM 
+          rooms r
+        JOIN 
+          rooms_facilities_relation rfr ON r.id = rfr.room_id
+        JOIN 
+          room_facilities f ON rfr.facility_id = f.id
+        GROUP BY 
+          r.id;
+      `
     );
 
     if (!roomRowList) throw new APIError({message: "Rooms not found", status: 400, safe: true});
@@ -120,21 +144,25 @@ export const getRoomList = async (): Promise<(Partial<RoomInterface> | undefined
 
 export const createRoom = async (
   roomData: RoomInterface
-): Promise<RoomInterface | void> => {
+): Promise<Partial<RoomInterface> | void> => {
+  let connection;
   try {
     const pool = await getPool();
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
-    const statusId = await getRelatedFieldId({connection, table: 'user_statuses', column: 'name', value: roomData.status!});
+    await connection.beginTransaction();
+
+    const statusId = await getRelatedFieldId({connection, table: 'room_statuses', column: 'name', value: roomData.status!});
     roomData.status_id = statusId as number;
     delete roomData.status;
 
-    const fields = Object.keys(roomData).join(', ');
-    const placeholders = Object.keys(roomData).map(() => '?').join(', ');
-    const values = Object.values(roomData);
+    const { facilities, ...roomFields } = roomData;
+    const fields = Object.keys(roomFields).join(', ');
+    const placeholders = Object.keys(roomFields).map(() => '?').join(', ');
+    const values = Object.values(roomFields);
 
     const [result] = await connection.query<ResultSetHeader>(
-      `INSERT INTO users (${fields}) VALUES (${placeholders})`,
+      `INSERT INTO rooms (${fields}) VALUES (${placeholders})`,
       values
     );
 
@@ -143,18 +171,58 @@ export const createRoom = async (
 
     const newRoomId = result.insertId;
 
+    for (const facilityName of facilities) {
+      // Retrieve the facility ID (assuming there's a unique constraint on name)
+      let [facilityRows] = await connection.query<RowDataPacket[]>(
+        'SELECT id FROM room_facilities WHERE name = ?',
+        [facilityName]
+      );
+
+      let facilityId = facilityRows[0].id;
+      // Insert into rooms_facilities_relation
+      await connection.query<ResultSetHeader>(
+        'INSERT INTO rooms_facilities_relation (room_id, facility_id) VALUES (?, ?)',
+        [newRoomId, facilityId]
+      );
+    }
+
+    await connection.commit();
+
     const [roomRowList] = await connection.query<RoomInterface[] & RowDataPacket[]>(
-      'SELECT * FROM users WHERE id = ?',
+      `
+        SELECT 
+          r.*, GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
+        FROM 
+          rooms r
+        JOIN 
+          rooms_facilities_relation rfr ON r.id = rfr.room_id
+        JOIN 
+          room_facilities f ON rfr.facility_id = f.id
+        WHERE 
+          r.id = ?
+        GROUP BY 
+          r.id;
+      `,
       [newRoomId]
     );
+
+    const newRoomRow = roomRowList[0];
+
+    const statusValue = await getRelatedFieldName({connection, table: 'room_statuses', column: 'name', id: newRoomRow.status_id!});
+    newRoomRow.status = statusValue as RoomStatusType;
+
     connection.release();
 
-    const newRoom = roomRowList[0];
+    const { status_id, ...newRoom } = newRoomRow;
 
     return newRoom;
   } catch (error) {
-    throw error;
+    if (connection) {
+      await connection.rollback();
+      connection.release();
+    }
 
+    throw error;
   }
 };
 
@@ -192,14 +260,19 @@ export const updateRoom = async (
   roomId: string,
   roomData: RoomInterface
 ): Promise<Partial<RoomInterface> | void> => {
+  let connection;
+
   try {
     const pool = await getPool();
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
-    if (roomData.status) {
-      const statusId = await getRelatedFieldId({connection, table: 'room_statuses', column: 'name', value: roomData.status!});
-      roomData.status_id = statusId as number;
-      delete roomData.status;
+    await connection.beginTransaction();
+
+    const { facilities, ...roomFields } = roomData;
+    if (roomFields.status) {
+      const statusId = await getRelatedFieldId({connection, table: 'room_statuses', column: 'name', value: roomFields.status!});
+      roomFields.status_id = statusId as number;
+      delete roomFields.status;
     }
 
     const [roomRowList] = await connection.query<RoomInterface[] & RowDataPacket[]>(
@@ -212,8 +285,8 @@ export const updateRoom = async (
     if (!roomRow) 
       throw new APIError({message: "Room not found", status: 404, safe: true});
 
-    const updateFields = Object.keys(roomData).map(key => `${key} = ?`).join(', ');
-    const updateValues = Object.values(roomData);
+    const updateFields = Object.keys(roomFields).map(key => `${key} = ?`).join(', ');
+    const updateValues = Object.values(roomFields);
     updateValues.push(roomId);
 
     const [result] = await connection.query<ResultSetHeader>(
@@ -224,8 +297,45 @@ export const updateRoom = async (
     if (result.affectedRows === 0)
       throw new APIError({ message: "Update failed", status: 500, safe: true });
 
+    await connection.query<ResultSetHeader>(
+      'DELETE FROM rooms_facilities_relation WHERE room_id = ?',
+      [roomId]
+    );    
+    
+    if (facilities) {
+      for (const facilityName of facilities) {
+        // Retrieve the facility ID (assuming there's a unique constraint on name)
+        let [facilityRows] = await connection.query<RowDataPacket[]>(
+          'SELECT id FROM room_facilities WHERE name = ?',
+          [facilityName]
+        );
+  
+        let facilityId = facilityRows[0].id;
+        // Insert into rooms_facilities_relation        
+        await connection.query<ResultSetHeader>(
+          'INSERT INTO rooms_facilities_relation (room_id, facility_id) VALUES (?, ?)',
+          [roomId, facilityId]
+        );
+      }
+    }
+
+    await connection.commit();
+
     const [roomUpdatedRowList] = await connection.query<RoomInterface[] & RowDataPacket[]>(
-      `SELECT * FROM rooms WHERE id = ? `,
+      `
+        SELECT 
+          r.*, GROUP_CONCAT(f.name ORDER BY f.name SEPARATOR ', ') AS facilities
+        FROM 
+          rooms r
+        JOIN 
+          rooms_facilities_relation rfr ON r.id = rfr.room_id
+        JOIN 
+          room_facilities f ON rfr.facility_id = f.id
+        WHERE 
+          r.id = ?
+        GROUP BY 
+          r.id;
+      `,
       [roomId]
     );
     
@@ -233,6 +343,8 @@ export const updateRoom = async (
     
     if (!roomRowUpdated) 
       throw new APIError({message: "Updated room not found", status: 404, safe: true});
+
+    await connection.commit();
     
     const statusValue = await getRelatedFieldName({connection, table: 'room_statuses', column: 'name', id: roomRowUpdated.status_id!});
     roomRowUpdated.status = statusValue as RoomStatusType;

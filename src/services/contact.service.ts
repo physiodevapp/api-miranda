@@ -79,8 +79,8 @@ export const getContactList = async (): Promise<(Partial<ContactInterface> | und
     connection.release();
       
     return contactList;    
-  } catch (error) {
-    
+  } catch (error) {    
     throw error;   
+    
   }
 }
