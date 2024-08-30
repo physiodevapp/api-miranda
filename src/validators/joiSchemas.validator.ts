@@ -183,6 +183,7 @@ export const roomSchema = Joi.object({
 
   photos: Joi.array()
     .items(Joi.string().uri()) // Assuming photos are URLs, use .uri() to validate them
+    .required()
     .messages({
       'array.base': 'Photos must be an array of strings',
       'string.base': 'Each photo must be a string',
