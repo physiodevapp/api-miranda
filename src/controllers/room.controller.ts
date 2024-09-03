@@ -36,9 +36,10 @@ const detail = async (req: Request, res: Response, next: NextFunction) => {
 
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await deleteRoom(req.params.roomId)
+    const deletedRoom =  await getRoomById(req.params.roomId)
+    await deleteRoom(req.params.userId);
 
-    res.status(200).json();
+    res.status(200).json(deletedRoom);
   } catch (error) {
     next(error)
   }

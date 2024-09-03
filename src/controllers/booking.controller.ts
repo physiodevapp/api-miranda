@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
-import { getBookingById, getBookingList } from '../services/booking.service';
+import { deleteBooking, getBookingById, getBookingList } from '../services/booking.service';
  
 const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -23,7 +23,19 @@ const detail = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
+const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const deletedBooking =  await getBookingById(req.params.bookingId)
+    await deleteBooking(req.params.bookingId);
+
+    res.status(200).json(deletedBooking);
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const router = express.Router();
 
 router.get("/", headers, list);
 router.get("/:bookingId", headers, detail);
+router.delete("/:bookingId", headers, deleteOne);
