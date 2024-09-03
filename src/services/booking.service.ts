@@ -1,6 +1,7 @@
 import { BookingInterface } from "../interfaces/Booking.interface";
 import { APIError } from "../utils/APIError";
 import { Booking } from "../models/booking.model";
+import { ObjectId } from "mongodb";
 
 export const getBookingById = async (
   bookingId: string
@@ -31,6 +32,16 @@ export const getBookingList = async (
     if (!bookingList) throw new APIError({message: "Bookings not found", status: 400, safe: true});
 
     return bookingList;
+  } catch (error) {
+    
+    throw error;
+  }
+};
+
+export const deleteBooking = async (bookingId: string): Promise<void> => {
+  try {
+    const objectId = new ObjectId(bookingId);
+    await Booking.deleteOne({ _id: objectId });
   } catch (error) {
     
     throw error;
