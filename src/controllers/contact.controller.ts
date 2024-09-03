@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { headers } from '../middlewares/response.middleware';
-import { getContactById, getContactList } from '../services/contact.service';
+import { getContactById, getContactList, updateContact } from '../services/contact.service';
 
 const list = async (_req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,7 +22,18 @@ const detail = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
+const updateOne = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const updatedUser = await updateContact(req.params.contactId, req.body)
+    
+    res.status(200).json(updatedUser)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const router = express.Router();
 
 router.get("/", headers, list);
 router.get("/:contactId", headers, detail);
+router.patch("/:contactId", headers, updateOne);

@@ -29,3 +29,23 @@ export const getContactList = async (): Promise<ContactInterface[] | void>  => {
     throw error;   
   }
 }
+
+export const updateContact = async (
+  contactId: string,
+  contactData: ContactInterface
+): Promise<ContactInterface | void> => {
+  try {
+    const updateContact = await Contact.findById(contactId);
+
+    if (!updateContact) throw new APIError({message: "Contact not found", status: 404, safe: true});
+
+    Object.assign(updateContact, contactData);
+
+    const updatedContact = await updateContact.save();
+
+    return updatedContact;
+  } catch (error) {
+    
+    throw error;
+  }
+};
