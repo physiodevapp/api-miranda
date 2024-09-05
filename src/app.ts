@@ -19,7 +19,7 @@ import cors from 'cors';
 export const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: process.env.CLIENT_BASE_URL,
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));

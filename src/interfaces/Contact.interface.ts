@@ -14,6 +14,7 @@ export interface ContactInterface {
   phone: string,
   subject: string,
   message: string,
+  photo: string,
   datetime: Date,
   createdAt?: Date,
   updatedAt?: Date,

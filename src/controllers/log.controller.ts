@@ -9,7 +9,6 @@ export const login = async (
   next: NextFunction
 ) => {
   const { email, password } = req.body;
-  console.log('req.body ', req.body)
 
   const user = await User.findOne({ email });
 
@@ -23,7 +22,7 @@ export const login = async (
       const token = generateToken(payload);
 
       res.setHeader('Authorization', `Bearer ${token}`);
-      res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+      res.setHeader('Access-Control-Expose-Headers', 'Authorization, X-Amzn-Remapped-Authorization');
 
       res.status(200).json({
         id: user.id,

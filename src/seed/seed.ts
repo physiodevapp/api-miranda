@@ -111,6 +111,86 @@ const determineBookingStatus = (checkInDate: Date, checkOutDate: Date) => {
   }
 };
 
+// const getRandomImages = (urls: string[], count: number = 2): string[] => {
+//   // Create a copy of the original array
+//   const shuffled = [...urls].sort(() => 0.5 - Math.random());
+  
+//   // Return the first `count` elements from the shuffled array
+//   return shuffled.slice(0, count);
+// }
+
+const getRandomImages = (urls: string[], count: number = 2, deleteSelected: boolean = false): string[] => {
+  // Create a copy of the original array to avoid modifying the original
+  const shuffled = [...urls].sort(() => 0.5 - Math.random());
+  
+  // Get the first `count` elements from the shuffled array
+  const selected = shuffled.slice(0, count);
+  
+  // If deleteSelected is true, remove the selected elements from the original array
+  if (deleteSelected) {
+    selected.forEach(url => {
+      const index = urls.indexOf(url);
+      if (index > -1) {
+        urls.splice(index, 1);
+      }
+    });
+  }
+  
+  // Return the selected elements
+  return selected;
+};
+
+
+const roomImageUrlList: string[] = [
+  "https://images.pexels.com/photos/1484981/pexels-photo-1484981.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/376531/pexels-photo-376531.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/1879061/pexels-photo-1879061.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/2082087/pexels-photo-2082087.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/262048/pexels-photo-262048.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/2029687/pexels-photo-2029687.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/15743369/pexels-photo-15743369/free-photo-of-cama-habitacion-pintura-pintando.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/5644286/pexels-photo-5644286.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/5179599/pexels-photo-5179599.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/14917454/pexels-photo-14917454.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/4300056/pexels-photo-4300056.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/5644284/pexels-photo-5644284.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/8135105/pexels-photo-8135105.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/7167062/pexels-photo-7167062.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/9565781/pexels-photo-9565781.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/12289357/pexels-photo-12289357.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/14286298/pexels-photo-14286298.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/9565725/pexels-photo-9565725.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+];
+
+const userImageUrlList: string[] = [
+  "https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/5924172/pexels-photo-5924172.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3797926/pexels-photo-3797926.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3811717/pexels-photo-3811717.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3797837/pexels-photo-3797837.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/6801642/pexels-photo-6801642.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3088526/pexels-photo-3088526.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3786525/pexels-photo-3786525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3545784/pexels-photo-3545784.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3812742/pexels-photo-3812742.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+];
+
+const contactImageUrlList: string[] = [
+  "https://images.pexels.com/photos/8171181/pexels-photo-8171181.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/5711541/pexels-photo-5711541.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/3757008/pexels-photo-3757008.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/1644924/pexels-photo-1644924.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/19091621/pexels-photo-19091621/free-photo-of-chica-guapa-que-tiene-trenzas-con-gafas.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/19089120/pexels-photo-19089120/free-photo-of-una-chica-con-tatuajes-en-el-cuello.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/7648239/pexels-photo-7648239.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/7148689/pexels-photo-7148689.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/27928350/pexels-photo-27928350/free-photo-of-blanco-y-negro-moda-mujer-textura.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  "https://images.pexels.com/photos/16072507/pexels-photo-16072507/free-photo-of-blanco-y-negro-moda-mujer-misterioso.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+];
+
+
+
 const seedContacts = async () => {
   try {
     await Contact.deleteMany({});
@@ -123,6 +203,7 @@ const seedContacts = async () => {
         last_name: faker.person.lastName(),
         email: faker.internet.email(),
         phone: faker.phone.number(),
+        photo: getRandomImages(contactImageUrlList, 1, true)[0],
         subject: faker.lorem.words(3),
         message: faker.lorem.paragraph(),
         datetime: faker.date.past(),
@@ -147,7 +228,7 @@ const seedUsers = async () => {
       return User.create({
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
-        photo: faker.image.avatarGitHub(), 
+        photo: getRandomImages(userImageUrlList, 1, true)[0], 
         start_date: faker.date.past({ years: 1 }).toISOString(),
         job_description: faker.lorem.sentence(),
         telephone: faker.phone.number(),
@@ -163,8 +244,8 @@ const seedUsers = async () => {
     const customUser = await User.create({
       first_name: "Admin",
       last_name: "Miranda",
-      photo: faker.image.avatar(), 
-      start_date: faker.date.past({ years: 1 }),//.toISOString(),
+      photo: "https://avatars.githubusercontent.com/u/69968873?v=4", 
+      start_date: faker.date.past({ years: 1 }),
       job_description: faker.lorem.sentence(),
       telephone: faker.phone.number(),
       status: getRandomUserStatus(),
@@ -200,7 +281,7 @@ const seedRooms = async () => {
         price_night: generatePrice(),
         discount: faker.number.int({ min: 0, max: 50 }),
         status: getRandomRoomStatusType(),
-        photos: [faker.image.url(), faker.image.url()]
+        photos: getRandomImages(roomImageUrlList, 2)
       });
     });    
     

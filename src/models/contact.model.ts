@@ -23,6 +23,7 @@ const contactSchema = new Schema<ContactInterface>(
         message: (props) => `${props.value} is not a valid email address!`,
       },
     },
+    photo: { type: String, required: [true, "A user's photo is required"] },
     phone: { type: String, required: [true, "Phone number is required"] },
     subject: { type: String, required: [true, "Subject is required"] },
     message: { type: String, required: [true, "Message is required"] },
