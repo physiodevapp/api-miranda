@@ -23,11 +23,12 @@ jobs:
       run: npm run build
     - name: Set up environment variables
       run: |
-        touch .env
-        printf "SECRET_KEY=%s\n" "${{ secrets.SECRET_KEY }}" >> .env
-        printf "MONGO_DB_URI=%s\n" "${{ secrets.MONGO_DB_URI }}" >> .env
-        printf "STATIC_FILES_BASE_URL=%s\n" "${{ secrets.STATIC_FILES_BASE_URL }}" >> .env
-        printf "CLIENT_BASE_URL=%s\n" "${{ secrets.CLIENT_BASE_URL }}" >> .env
+        echo '{' > .env.json
+        echo '"SECRET_KEY": "${{ secrets.SECRET_KEY }}",' >> .env.json
+        echo '"MONGO_DB_URI": "${{ secrets.MONGO_DB_URI }}",' >> .env.json
+        echo '"STATIC_FILES_BASE_URL": "${{ secrets.STATIC_FILES_BASE_URL }}",' >> .env.json
+        echo '"CLIENT_BASE_URL": "${{ secrets.CLIENT_BASE_URL }}"' >> .env.json
+        echo '}' >> .env.json
     - name: serverless deploy
       uses: serverless/github-action@v3.2
       with:
