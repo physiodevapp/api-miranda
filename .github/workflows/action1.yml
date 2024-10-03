@@ -18,9 +18,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - name: Build project
-      run: npm run build
     - name: Set up environment variables
       run: |
         echo '{' > .env.json
@@ -29,6 +26,9 @@ jobs:
         echo '"STATIC_FILES_BASE_URL": "${{ secrets.STATIC_FILES_BASE_URL }}",' >> .env.json
         echo '"CLIENT_BASE_URL": "${{ secrets.CLIENT_BASE_URL }}"' >> .env.json
         echo '}' >> .env.json
+    - run: npm ci
+    - name: Build project
+      run: npm run build
     - name: serverless deploy
       uses: serverless/github-action@v3.2
       with:
