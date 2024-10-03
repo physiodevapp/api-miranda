@@ -23,6 +23,7 @@ jobs:
       run: npm run build
     - name: Set up environment variables
       run: |
+        touch .env
         printf "SECRET_KEY=%s\n" "${{ secrets.SECRET_KEY }}" >> .env
         printf "MONGO_DB_URI=%s\n" "${{ secrets.MONGO_DB_URI }}" >> .env
         printf "STATIC_FILES_BASE_URL=%s\n" "${{ secrets.STATIC_FILES_BASE_URL }}" >> .env
