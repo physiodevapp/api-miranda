@@ -26,7 +26,7 @@ jobs:
         echo '"STATIC_FILES_BASE_URL": "${{ secrets.STATIC_FILES_BASE_URL }}",' >> .env.json
         echo '"CLIENT_BASE_URL": "${{ secrets.CLIENT_BASE_URL }}"' >> .env.json
         echo '}' >> .env.json
-    - run: npm ci
+    - run: npm install
     - name: Build project
       run: npm run build
     - name: serverless deploy
