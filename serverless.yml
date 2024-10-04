@@ -6,6 +6,7 @@ package:
     - "node_modules/**"
     - "dist/**"
 provider:
+
   name: aws
   region: eu-west-3
   stage: ${opt:stage, 'dev'}  # Default to 'dev' stage if not specified
